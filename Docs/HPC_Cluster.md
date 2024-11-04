@@ -76,6 +76,25 @@ Durch anklicken des folgenden Links in Schritt 2. https://web.hpc.hs-osnabrueck.
 
 2. Es öffnet sich ein Dropdown menü Klicke nun *Jupyter Lab*
 
+Alternativ kannst du auch direkt auf
+Pinned Apps:
+    - Juptyer Lab anklicken beide führen dich auf die gleiche Seite
+
+
+Einrichtung von Jupyter Lab:
+
+3. Account
+Such dein Account für  das jewelige Projekt. Durch das Anklicken des Feldes siehst du deine Accounts die dir zur Verfügung stehen.
+
+4. Ersetzte nun "Python Virtual Environment":
+- `/cluster/user/$USER/venvs/myenv` <- 
+- Solltest du die Anleitung genau befolgt haben ist alles bereits fertig und es müssen keine änderung durchgeführt werden.
+
+- Solltest du jedoch dein Venv nicht wie in der Anleitung bennant haben setzt du das Verzeichnis wo dein Venv vorzufinden ist sowie den namen deines venvs
+
+bsp: `pfad/zu/deinem/venv/projekt1` <- name des venvs `projekt1`
+
+
 **ACHTUNG:** die Ressourcen einteilung sollte sinnvoll eingesetzt werden da auch Verwarnung bis hinzu Konto sperrungen enstehen können, sollte man uneffizient und alle Ressourcen ausnutzen.
 
 *Anzahl der Stunden*:
@@ -87,8 +106,5 @@ Durch anklicken des folgenden Links in Schritt 2. https://web.hpc.hs-osnabrueck.
 *GPU-Typ:*
 - Typ und Größe der GPU (falls vorhanden), der Ihre Anwendung zugewiesen wird. Bitte gehen Sie sparsam mit den Ressourcen um, um eine gute Benutzererfahrung für alle zu gewährleisten.
 
+Sobald alles Spezifiziert ist kann durch runter scrollen auf Launch der Jupyter Notebook gestartet werden
 
-Einrichtung von Jupyter:
-
-Ersetzte nun "Python Virtual Environment:
-- `/cluster/user/$USER/venvs/myvenv` <- dein Verzeichnis einsetzten wo dein venv ist sollstest du die Anleitung genau befolgt haben ist alles bereits fertig und müssen daher keiner änderung durch geführt werden.
