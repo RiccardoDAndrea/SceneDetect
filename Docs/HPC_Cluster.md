@@ -38,7 +38,7 @@ Um eine virtuelle Umgebung (venv) zu erstellen, folgen Sie diesen Schritten:
 
 7. **Erstellen Sie die virtuelle Umgebung:**
 
-    `python3 -m venv myenv`
+    `python3 -m venv myenv`     <- bennung deines *venvs*
 
 8. **Aktivierung des venvs**
     
@@ -60,14 +60,35 @@ Um eine virtuelle Umgebung (venv) zu erstellen, folgen Sie diesen Schritten:
 
     `pip list` 
 
+13. Nächste sitzung
+In der nächste Sitzung sollte durch folgenden Befehl der venv direkt aktiviert werden
 
+    `source /cluster/user/$USER/venvs/myenv/bin/activate`
 
+14. Jupyter Nootebook nutzen
+
+    `pip install jupyter`
 
 ## 3. Jupyter Notebook verbinden
 Durch anklicken des folgenden Links in Schritt 2. https://web.hpc.hs-osnabrueck.de wird man auf den HPCluster Webschnittstelle geführt.
 
-- Klicke nun auf *Interactve Apps* mittig oben oder auch mittig unter der Suchleiste
+1. Klicke nun auf *Interactve Apps* mittig oben oder auch mittig unter der Suchleiste
 
--  Es öffnet sich ein Dropdown menü Klicke nun Jupyter Lab
+2. Es öffnet sich ein Dropdown menü Klicke nun *Jupyter Lab*
 
 **ACHTUNG:** die Ressourcen einteilung sollte sinnvoll eingesetzt werden da auch Verwarnung bis hinzu Konto sperrungen enstehen können, sollte man uneffizient und alle Ressourcen ausnutzen.
+
+*Anzahl der Stunden*:
+- Die Anzahl der Stunden, die diese interaktive Anwendung laufen wird. Wenn die Zeit abgelaufen ist, wird der Auftrag beendet und die Anwendung wird gestoppt.
+
+*Kerne:*
+- Die Anzahl der CPU-Kerne, die Ihrer Anwendung zugewiesen werden sollen. Bitte gehen Sie sparsam mit den Ressourcen um, um eine gute Benutzererfahrung für alle zu gewährleisten.
+
+*GPU-Typ:*
+- Typ und Größe der GPU (falls vorhanden), der Ihre Anwendung zugewiesen wird. Bitte gehen Sie sparsam mit den Ressourcen um, um eine gute Benutzererfahrung für alle zu gewährleisten.
+
+
+Einrichtung von Jupyter:
+
+Ersetzte nun "Python Virtual Environment:
+- `/cluster/user/$USER/venvs/myvenv` <- dein Verzeichnis einsetzten wo dein venv ist sollstest du die Anleitung genau befolgt haben ist alles bereits fertig und müssen daher keiner änderung durch geführt werden.
