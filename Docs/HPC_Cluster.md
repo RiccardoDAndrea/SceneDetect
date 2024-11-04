@@ -108,10 +108,22 @@ Such dein Account für  das jewelige Projekt. Durch das Anklicken des Feldes sie
 *GPU-Typ:*
 - Typ und Größe der GPU (falls vorhanden), der Ihre Anwendung zugewiesen wird. Bitte gehen Sie sparsam mit den Ressourcen um, um eine gute Benutzererfahrung für alle zu gewährleisten.
 
----
 
-Sobald alles Spezifiziert ist kann durch runter scrollen auf Launch der Jupyter Notebook gestartet werden. 
+**Jupyter Lab launch**
+
+Sobald alles Spezifiziert ist kann durch runter scrollen auf `Launch` der Jupyter Notebook gestartet werden. 
 - Dies kann einige Sekunden andauern bis das Jupyter Nootebook gelunched wird
 
 Nach eininger Zeit Startet das Juptyer Nootebook und der Button
 `Connect to Jupyter` kann betätigt werden.
+
+
+## 4. Remote zugriff mit SSH verbindung zum HPCluster
+Lade folgende Extension 
+
+`PowerShell` 
+`Remote Explorer`
+`Rempote SSH`
+`Remote-SSH: Editing Configuration Files`
+
+falls nicht schon getätigt.
