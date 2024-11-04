@@ -8,57 +8,57 @@ Aktivierung des VPN Clients, falls man nicht an der *Hochschule Osnabrück* ist
 Link: https://web.hpc.hs-osnabrueck.de (VPN Client muss aktiv sein)
 
 ### Eine Python-Umgebung aufbauen
-#### 1. **Um den Reibungslosen einsatzt von Python sowie Jupyter zu gewährleisten muss ein Venv erstellt werden**
+1. **Um den Reibungslosen einsatzt von Python sowie Jupyter zu gewährleisten muss ein Venv erstellt werden**
 
-- Docs zu den Venvs von Python https://docs.python.org/3/library/venv.html
+    - Docs zu den Venvs von Python https://docs.python.org/3/library/venv.html
 
 Um eine virtuelle Umgebung (venv) zu erstellen, folgen Sie diesen Schritten:
 
 
-#### 2. **Navigieren Sie in der oberen blauen Leiste zu:**
+2. **Navigieren Sie in der oberen blauen Leiste zu:**
    - **Clusters**
    - **HiPer4All Shell Access**
 
    Dadurch erhalten Sie Zugriff auf das Terminal (SSH), um Ihre venv zu erstellen.
 
-#### 3. **Weitere Informationen finden Sie in den ausführlichen Dokumentationen der Hochschule:**
+3. **Weitere Informationen finden Sie in den ausführlichen Dokumentationen der Hochschule:**
 [Dokumentation zur Python-Umgebung](https://docs.hpc.hs-osnabrueck.de/de/pages/usage/web/apps/python/create-env.html).
 
-#### 4. **Navigieren Sie zu Ihrem Arbeitsverzeichnis:**
+4. **Navigieren Sie zu Ihrem Arbeitsverzeichnis:**
 
-`cd /cluster/user/$USER`
+   `cd /cluster/user/$USER`
    
-#### 5. **Erstellen Sie ein Verzeichnis für alle Ihre virtuellen Umgebungen:**
+5. **Erstellen Sie ein Verzeichnis für alle Ihre virtuellen Umgebungen:**
 
-`mkdir venvs`
+    `mkdir venvs`
 
-#### 6. **Wechseln Sie in das neu erstellte Verzeichnis:**
+6. **Wechseln Sie in das neu erstellte Verzeichnis:**
 
-`cd venvs`
+    `cd venvs`
 
-#### 7. **Erstellen Sie die virtuelle Umgebung:**
+7. **Erstellen Sie die virtuelle Umgebung:**
 
-`python3 -m venv myenv`
+    `python3 -m venv myenv`
 
-#### 8. **Aktivierung des venvs**
+8. **Aktivierung des venvs**
     
-`source /cluster/user/$USER/venvs/myenv/bin/activate`
+    `source /cluster/user/$USER/venvs/myenv/bin/activate`
 
-#### 9. **Im Terminal sollte nun im Verzeichnis:**
+9. **Im Terminal sollte nun im Verzeichnis:**
 
-`(myenv) [username@m10-09 venvs]$`
+    `(myenv) [username@m10-09 venvs]$`
 
-#### 10. **Wenn alles erfolgreich ist kann der pip manager geupdatet werden mit dem Befehl:**
+10. **Wenn alles erfolgreich ist kann der pip manager geupdatet werden mit dem Befehl:**
 
-`pip install --upgrade pip`
+    `pip install --upgrade pip`
 
-#### 11. **Nachdem pip aktualisiert wurde können nun auch Libaries wie pandas oder Matplotlib insterliert werden in der Umgebung**
+11. **Nachdem pip aktualisiert wurde können nun auch Libaries wie pandas oder Matplotlib insterliert werden in der Umgebung**
 
-`pip install matplotlib pandas`
+    `pip install matplotlib pandas`
 
-#### 12. **Anzeige der Libaries im venv** 
+12. **Anzeige der Libaries im venv** 
 
-`pip list` 
+    `pip list` 
 
 
 
