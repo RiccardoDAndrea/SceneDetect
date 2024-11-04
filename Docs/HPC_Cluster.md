@@ -13,35 +13,39 @@ Um den Reibungslosen einsatzt von Python sowie Jupyter zu gewährleisten muss ei
 
 - Docs zu den Venvs von Python https://docs.python.org/3/library/venv.html
 
-Um ein **venv** zu erstellen gehen wir auf auf der oberen blauen Leiste und Klicken 
+Um eine virtuelle Umgebung (venv) zu erstellen, folgen Sie diesen Schritten:
 
-- *Clusters* 
+1. Navigieren Sie in der oberen blauen Leiste zu:
+   - **Clusters**
+   - **HiPer4All Shell Access**
 
-- *HiPer4All Shell Access*
-somit haben wir den Terminal oder auch *Shh* um unsere **venv** zuerstellen.
+   Dadurch erhalten Sie Zugriff auf das Terminal (SSH), um Ihre venv zu erstellen.
 
-Ausführliche Docs der HS: https://docs.hpc.hs-osnabrueck.de/de/pages/usage/web/apps/python/create-env.html
+2. Weitere Informationen finden Sie in den ausführlichen Dokumentationen der Hochschule:
+[Dokumentation zur Python-Umgebung](https://docs.hpc.hs-osnabrueck.de/de/pages/usage/web/apps/python/create-env.html).
 
-Navigation zu unseren Arbeitsverzeichnis
+3. Navigieren Sie zu Ihrem Arbeitsverzeichnis:
 
-1. ``cd /cluster/user/$USER``
+   `cd /cluster/user/$USER`
+   
+4. Erstellen Sie ein Verzeichnis für alle Ihre virtuellen Umgebungen:
 
-Erstellen Sie hier ein Verzeichnis für alle Ihre venvs:
+    `mkdir venvs`
 
-`*mkdir venvs*`
+5. Wechseln Sie in das neu erstellte Verzeichnis:
 
-Gehen Sie in dieses neue Verzeichnis:
+    `cd venvs`
 
-`cd venvs`
+6. Erstellen Sie die virtuelle Umgebung:
 
-`python3 -m venv myenv`
+    `python3 -m venv myenv`
 
-`source /cluster/user/$USER/venvs/myenv/bin/activate`
+    Aktivierung des venvs
+    `source /cluster/user/$USER/venvs/myenv/bin/activate`
 
-(myenv) [username@m10-09 venvs]$
+7. Im Terminal sollte nun im Verzeichnis:
 
-
-
+    `(myenv) [username@m10-09 venvs]$`
 
 
 ### 3. Jupyter Notebook verbinden
