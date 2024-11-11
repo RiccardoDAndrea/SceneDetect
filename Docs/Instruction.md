@@ -5,10 +5,9 @@
 *Streamlit*
 Der User soll die möglichkeit haben 100 Bilder zu Importieren
 Um das Modell zu Kalibieren.
-Import von 100 Bilder 
-Ein Datensatz und 
-Katze oder sowas 
-- Und weiter 500 Bilder wo was nicht ist.
+- Import von 100 Bilder 
+Ein Datensatz von Katze und Hunden 
+- Und weiter 500 Bilder wo Hunde und Katzen nicht drauf sind
 - CNN Networks  zwei CNN Architektur
 - Transformers 
 
