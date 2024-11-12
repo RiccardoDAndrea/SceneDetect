@@ -107,10 +107,35 @@ def create_dir(original_dataset_dir_cat = str, original_dataset_dir_dog=str):
 
 #create_dir(original_dataset_dir_cat='Data\Cat', original_dataset_dir_dog='Data\Dog')
 
-from keras import layers, models
+from keras import layers, models, optimizers
 
-model = models.Sequential()
-model.add(layers.Conv2D(32,(3,3), 
-                        activation='relu',
-                        input_shape=(150,150,3)))
-model.add(layers.MaxPooling2D((2,2)))
+
+def model_Conv():
+    model = models.Sequential()
+    model.add(layers.Conv2D(32,(3,3), 
+                            activation='relu',
+                            input_shape=(150,150,3)))
+    model.add(layers.MaxPooling2D((2,2)))
+    model.add(layers.Conv2D(64,(3,3), activation='relu'))
+    model.add(layers.MaxPooling2D((2,2)))
+    model.add(layers.Conv2D(128,(3,3), activation='relu'))
+    model.add(layers.MaxPooling2D((2,2)))
+    model.add(layers.Conv2D(128,(3,3), activation='relu'))
+    model.add(layers.MaxPooling2D((2,2)))
+    model.add(layers.Flatten())
+    model.add(layers.Dense(512, activation='relu'))
+    model.add(layers.Dense(1, activation='sigmoid'))
+
+
+    model.compile(loss='binary_crossentropy',
+                        optimizer=optimizers.RMSprop(learning_rate=1e-4),
+                        metrics=['acc'])
+    print(model.summary())
+    return None
+
+# model_Conv()
+
+
+
+
+
