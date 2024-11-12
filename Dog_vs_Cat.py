@@ -16,6 +16,9 @@ def create_dir(original_dataset_dir_cat = str, original_dataset_dir_dog=str):
     
     
     base_dir = r'C:\Users\riandrea\Desktop\Github\SceneDetect\cats_and_dogs_small'
+    train_dir = None
+    test_dir = None
+    validation_dir = None
 
     if os.path.exists(base_dir) == False:
         os.mkdir(base_dir)
@@ -102,13 +105,11 @@ def create_dir(original_dataset_dir_cat = str, original_dataset_dir_dog=str):
         print('total validation cat images:', 
             len(os.listdir(base_dir+ "/validation/dogs/")))
     
-    return None
+    return train_dir, test_dir, validation_dir
 
-
-#create_dir(original_dataset_dir_cat='Data\Cat', original_dataset_dir_dog='Data\Dog')
+create_dir(original_dataset_dir_cat='Data\Cat', original_dataset_dir_dog='Data\Dog')
 
 from keras import layers, models, optimizers
-
 
 def model_Conv():
     model = models.Sequential()
@@ -135,7 +136,15 @@ def model_Conv():
 
 # model_Conv()
 
+# from tensorflow import keras
+# from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
 
 
+# train_datagen = ImageDataGenerator(rescale=1./255)
+# test_datagen = ImageDataGenerator(rescale=1./255)
+
+# train_generator = train_datagen.flow_from_directory(
+#     train_dir
 
 
+# )
