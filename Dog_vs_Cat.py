@@ -165,4 +165,16 @@ validation_generator = test_datagen.flow_from_directory(
     batch_size=20,
     class_mode='binary')
 
-print(train_generator)
+def desc_data():
+    for data_batch, labels_patch in train_generator:
+        print('data batch shape:', data_batch.shape)
+        print('label batch shape:', labels_patch.shape)
+        break
+    return data_batch, labels_patch
+
+# data_batch, labels_patch = desc_data()  
+
+# print('Returned data batch shape:', data_batch.shape)
+# print('Returned label batch shape:', labels_patch.shape)
+
+
