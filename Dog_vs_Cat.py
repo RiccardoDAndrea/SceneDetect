@@ -91,23 +91,33 @@ def create_dir(original_dataset_dir_cat = str, original_dataset_dir_dog=str):
 
     else:
         print('total test cat images:', 
-            len(os.listdir(base_dir+ "/test/cats/")))
+            len(os.listdir(base_dir + "/test/cats/")))
+        
         print('total test cat images:', 
-            len(os.listdir(base_dir+ "/test/dogs/")))
+            len(os.listdir(base_dir + "/test/dogs/")))
         
         print('total training cat images:', 
-            len(os.listdir(base_dir+ "/train/cats/")))
+            len(os.listdir(base_dir + "/train/cats/")))
+        
         print('total training cat images:', 
-            len(os.listdir(base_dir+ "/train/dogs/")))
+            len(os.listdir(base_dir + "/train/dogs/")))
         
         print('total validation cat images:', 
-            len(os.listdir(base_dir+ "/validation/cats/")))
+            len(os.listdir(base_dir + "/validation/cats/")))
+        
         print('total validation cat images:', 
-            len(os.listdir(base_dir+ "/validation/dogs/")))
+            len(os.listdir(base_dir + "/validation/dogs/")))
+        
+        train_dir = 'cats_and_dogs_small/train'
+        validation_dir = 'cats_and_dogs_small/validation'
     
     return train_dir, test_dir, validation_dir
 
-create_dir(original_dataset_dir_cat='Data\Cat', original_dataset_dir_dog='Data\Dog')
+train_dir, test_dir, validation_dir = create_dir(original_dataset_dir_cat='Data\Cat', original_dataset_dir_dog='Data\Dog')
+
+print(train_dir, test_dir, validation_dir)
+
+
 
 from keras import layers, models, optimizers
 
@@ -136,15 +146,23 @@ def model_Conv():
 
 # model_Conv()
 
-# from tensorflow import keras
-# from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
+from tensorflow import keras
+from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
 
 
-# train_datagen = ImageDataGenerator(rescale=1./255)
-# test_datagen = ImageDataGenerator(rescale=1./255)
+train_datagen = ImageDataGenerator(rescale=1./255)
+test_datagen = ImageDataGenerator(rescale=1./255)
 
-# train_generator = train_datagen.flow_from_directory(
-#     train_dir
+train_generator = train_datagen.flow_from_directory(
+    train_dir,
+    target_size=(150,150),
+    batch_size=20,
+    class_mode='binary')
 
+validation_generator = test_datagen.flow_from_directory(
+    validation_dir,
+    target_size=(150,150),
+    batch_size=20,
+    class_mode='binary')
 
-# )
+print(train_generator)
