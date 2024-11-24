@@ -127,3 +127,67 @@ Lade folgende Extension
 `Remote-SSH: Editing Configuration Files`
 
 falls nicht schon getätigt.
+Mein Verbindungs skript:
+
+#### Read more about SSH config files: https://linux.die.net/man/5/ssh_config
+#### Konfiguration für den HPC-Server der Hochschule Osnabrück
+
+```
+Host hpc.hs-osnabrueck.de
+    HostName hpc.hs-osnabrueck.de
+    User dein_username_kürzel
+    Port 22
+    IdentityFile ~/.ssh/id_rsa_hpc
+    ForwardAgent yes
+    Compression yes
+```
+
+Nachdem die Verbindung aufgebaut wurde wird man aufgefordert sein Passwort einzugeben. Sollte dies erfolgreich erfüllt werden steht die Verindung zu den HPCluster.
+
+### SLURM 
+Die Schüsselkomponete SLURM ermöglicht uns über VSCode Skripte auszuführe sei es Notebooks oder auch Python skripte.
+Diese Befehle werden auf den leistungsstarken Rechenknoten und nicht auf dem Anmeldeknoten ausgeführt!
+
+
+
+Durch die Eingabe folgedem Befehl werden dir alle Accounts aufgelistet die dir zuverfügung stehen für die SLURM Jobs die ausgeführt werden können.
+
+`sacctmgr list associations User=$(whoami) format=Account%32`
+
+Die Account auflistung kann im nächsten Schritt *copy pasted verweden*
+
+`srun -n 1 --account my_account python3 my_script.py`
+
+Statt my_account kann die Verfügbaren Accounts eingesetzt werden aus dem vorherigen Befehl. in meinem Fall
+
+`srun -n 1 --account f_staty_11 python3 my_script.py`
+
+Dabei wird in deiner VSExploer nach der Datei *my_script.py* gesucht aus deinem Verzeichnis und diese wird ausgeführt.
+
+### Weitere Konfiguration bei Rechen intensiviere Alogrithemen.
+ 
+Um den srun mehr Parameter mitzugeben für CPU und GPU nutzen wir folgende Befehle:
+
+`srun --account my_account --gres=gpu:<gpu_type>:<num_gpus> python3 my_script.py`
+
+`–gres=gpu`:
+Diese Option gibt den Typ und die Anzahl der GPUs an, die Sie für Ihren Auftrag anfordern möchten. Wenn Ihr Auftrag zum Beispiel 2 GPUs mit je 80 GB VRAM benötigt, würden Sie –gres=gpu:ampere80:2 verwenden
+
+`<gpu_type>`:
+Ersetzen Sie `<gpu_type>` durch eine der unten aufgeführten Optionen, um einen GPU-Typ mit einer bestimmten VRAM-Größe auszuwählen.
+
+`<num_gpus>`:
+Ersetzen Sie `<num_gpus>` durch die Anzahl der für Ihren Auftrag erforderlichen GPUs.
+
+`python3 my_script.py`:
+Dies ist der eigentliche Befehl zur Ausführung Ihres Skripts, das die angeforderten GPUs nutzt. Ersetzen Sie my_script.py durch den Namen Ihres Skripts.
+
+
+Arten von GPU Typen:
+| GPU-Name          | VRAM     | MIG   | Verfügbare Anzahl |
+| :---------------- | :------: | ----: |---------------:   |
+|       ampere80    |  80gb    | NEIN  |        8          |
+|       1g.20gb     |  20GB    | JA    |        96         |
+|       1g.5gb      |  5Gb     | JA    |        98         |
+
+***ACHTUNG*** Ressourcen so nutzen wie sie wirklich gebraucht werden übermäißge verschwendung und effzienter Handhabungen kann dazu führen das der Account eingeschränkt wird.
