@@ -160,7 +160,7 @@ Die Account auflistung kann im nächsten Schritt *copy pasted verweden*
 
 Statt my_account kann die Verfügbaren Accounts eingesetzt werden aus dem vorherigen Befehl. in meinem Fall
 
-`srun -n 1 --account f_staty_11 python3 my_script.py`
+`srun -n 1 --account projekt_name python3 my_script.py`
 
 Dabei wird in deiner VSExploer nach der Datei *my_script.py* gesucht aus deinem Verzeichnis und diese wird ausgeführt.
 
