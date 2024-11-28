@@ -49,7 +49,7 @@ with MobileNetV2_expander:
 
 senet_expander = st.expander("senet")
 with senet_expander:
-    st.write("Hallo")
+    
     model = torch.hub.load('pytorch/vision:v0.10.0', 'squeezenet1_0', pretrained=True)
     
     input_image = Image.open(image_file)
