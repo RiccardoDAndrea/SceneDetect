@@ -151,26 +151,45 @@ else:
                     validation_labels[:5] = 0
                     validation_labels[5:] = 1
 
+##############################################################
+####### C R E A T E _ M O D E L ##############################
+##############################################################
                     
-                    cat_output2 = Dense(2, activation='softmax')
-                    cat_output2 = cat_output2(model.layers[-2].output)
-                    cat_input2 = model.input
-                    cat_model2 = Model(inputs=cat_input2, outputs=cat_output2)
-                    for layer in cat_model2.layers[:-1]:
-                        layer.trainable = False
+                    new_layers = []
+                    for layer in model.layers[:-3]:  # Entferne alle Layer ab der drittletzten Schicht
+                        new_layers.append(layer)
 
-                    cat_model2.compile(
+                    # Füge deine eigenen Layer hinzu
+                    from tensorflow.keras.layers import Conv2D, Dense, Flatten
+
+                    # Hier wird ein neuer Dense-Layer hinzugefügt
+                    x = Dense(256, activation='relu')(model.layers[-5].output)
+                    x = Conv2D(32, (3, 3), activation='relu', padding='same')(model.layers[-3].output)
+                    x = Flatten()(x)
+                    x = Dense(64, activation='relu')(model.layers[-2].output)  # z. B. der drittletzte Layer
+                    x = Dense(2, activation='softmax')(x)  # Dein eigener Ausgabeschicht
+
+                    # Erstelle das neue Modell
+                    new_model = Model(inputs=model.input, outputs=x)
+                    
+
+                    # Optional: Alle Layer außer dem letzten Layer nicht trainierbar machen
+                    for layer in new_model.layers[:-1]:
+                        layer.trainable = False
+                    
+
+
+                    new_model.compile(
                         optimizer='adam',
                         loss='sparse_categorical_crossentropy',
                         metrics=['accuracy'])
                     
-                    cat_model2.fit(
+                    new_model.fit(
                         x=training_data,
                         y=training_labels,
                         validation_data=(validation_data, validation_labels),
                         epochs=5,
                         verbose=2)
-
                     # Bild auf Größe (224, 224) skalieren
                     
                     for image_file in image_files:
@@ -189,7 +208,7 @@ else:
                             data[0] = img_array
 
                             # Make a prediction using the model
-                            predictions = cat_model2.predict(data)
+                            predictions = new_model.predict(data)
 
                             predictions_df = pd.DataFrame({
                                 'Label': ['Cat', 'Dog'],
