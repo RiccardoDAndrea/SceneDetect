@@ -145,6 +145,8 @@ Host hpc.hs-osnabrueck.de
 Nachdem die Verbindung aufgebaut wurde wird man aufgefordert sein Passwort einzugeben. Sollte dies erfolgreich erfüllt werden steht die Verindung zu den HPCluster.
 
 ### SLURM 
+---
+
 Die Schüsselkomponete SLURM ermöglicht uns über VSCode Skripte auszuführe sei es Notebooks oder auch Python skripte.
 Diese Befehle werden auf den leistungsstarken Rechenknoten und nicht auf dem Anmeldeknoten ausgeführt!
 
