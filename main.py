@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import imageio.v2 as imageio 
 from PIL import Image
+import pandas as pd
 from keras.applications.mobilenet_v2 import preprocess_input
 from keras.applications.mobilenet_v2 import MobileNetV2
 from keras.applications.mobilenet_v2 import decode_predictions
@@ -29,15 +30,19 @@ import requests
 st.title("Webpage")
 
 # Display image uploader
-image_file = st.file_uploader("Upload your Pictures", type=["jpg", "jpeg", "png"])
+
+image_files = st.file_uploader("Upload your Pictures", accept_multiple_files=True, type=["jpg", "jpeg", "png"])
+for image_file in image_files:
+    img = imageio.imread(image_file)
 
 # Check if an image has been uploaded
-if image_file is None:
+if image_files is None:
     st.write("Please Upload an Image")
     st.stop()
 else:
     # Display the uploaded image
-    st.image(image_file, caption="Uploaded Image", use_container_width=True)
+    st.success("Uploaded successfully "+ str(int(len(image_files)))+" images")
+    #st.image(image_files, use_container_width=True)
     
     # Model selection
     options = st.multiselect(
@@ -63,8 +68,9 @@ else:
             if Fine_tune_toggle == False:
                 base_model = MobileNetV2(weights='imagenet', input_shape=(224, 224, 3))
 
-                # Bild laden
-                img = imageio.imread(image_file) # image from file_uploader Function
+            # Bild laden
+            
+                #img = imageio.imread(image_file) # image from file_uploader Function
 
                 # Bild auf Größe (224, 224) skalieren
                 img_resized = Image.fromarray(img).resize((224, 224))
@@ -86,117 +92,114 @@ else:
                 for name, desc, score in decode_predictions(predictions)[0]:
                     st.write('- {} ({:.2f}%)'.format(desc, 100 * score))
 
+            ##############################################################
+            ####### F I N E _ T U N I N G ################################
+            ##############################################################
+
             if Fine_tune_toggle == True:
                 model = MobileNetV2(weights='imagenet')
-
+                if len(image_files) == 0:
+                    st.write("Please upload your Pictures")
+                    st.stop()
+                else:
                 # empty Arry erstellen länge 40
-                data = np.empty((40, 224, 224, 3))
+                    data = np.empty((40, 224, 224, 3))
 
-                # looping over the Cats pictures
-                # TODO: Creating a Ordner Structure
-                for i in range(0, 20):
-                    im = imread(r'cats_and_dogs_small/train/cats/{}.jpg'.format(i + 1))  #- Ordner struktur aufbauen
-                    im = preprocess_input(im)
-                    im = resize(im, output_shape=(224, 224))                             # Model nimmt nur bestimmte PIXEL_WITDH und LENGTH an
-                    data[i] = im
-                
-                # looping over the Cats pictures
-                for i in range(0, 20):
-                    im = imread(r'cats_and_dogs_small/train/dogs/{}.jpg'.format(i + 1))
-                    im = preprocess_input(im)
-                    im = resize(im, output_shape=(224, 224))                              # Model nimmt nur bestimmte PIXEL_WITDH und LENGTH an
-                    data[i + 20] = im
-                
-                # Klassifikation erstellen 40 Bilder ingesamt die ersten 20 Hund die letzten 40 Katze
-                labels = np.empty(40, dtype=int)                
-                labels[:20] = 0
-                labels[20:] = 1
+                    # looping over the Cats pictures
+                    # TODO: Creating a Ordner Structure
+                    for i in range(0, 20):
 
-                # predictions = model.predict(data)
-                # for decoded_prediction in decode_predictions(predictions, top=1):
-                #     for name, desc, score in decoded_prediction:
-                #         st.write('- {} ({:.2f}%%)'.format(desc, 100 * score))
+                        # TODO: rename pictures to nummeric int 
+                        im = imread(r'cats_and_dogs_small/train/cats/{}.jpg'.format(i + 1))  #- Ordner struktur aufbauen
+                        im = preprocess_input(im)
+                        im = resize(im, output_shape=(224, 224))                             # Model nimmt nur bestimmte PIXEL_WITDH und PIXEL_LENGTH an
+                        data[i] = im
+                    
+                    # looping over the Cats pictures
+                    for i in range(0, 20):
+                        # TODO: rename pictures to nummeric int 
 
+                        im = imread(r'cats_and_dogs_small/train/dogs/{}.jpg'.format(i + 1))
+                        im = preprocess_input(im)
+                        im = resize(im, output_shape=(224, 224))                              # Model nimmt nur bestimmte PIXEL_WITDH und LENGTH an
+                        data[i + 20] = im
+                    
+                    # Klassifikation erstellen 40 Bilder ingesamt die ersten 20 Hund die letzten 40 Katze
+                    labels = np.empty(40, dtype=int)                
+                    labels[:20] = 0
+                    labels[20:] = 1
 
-                # Add layer to the base model
+                    
 
+                    # Add layer to the base model
+                    st.markdown("Create your Mobilenetv2 Model")
+                    
 
-                cat_output = Dense(2, activation='softmax')
-                cat_output = cat_output(model.layers[-2].output)    # Outputlayer verwerfen wir.
-                cat_input = model.input
-                cat_model = Model(inputs=cat_input, outputs=cat_output)
-                for layer in cat_model.layers[:-1]:
-                    layer.trainable = False # Einfrieren der Weights weil wir das Model nicht neu Laden möchten
+                    # The first 15 images for male and female cats will be used for training
+                    training_data = np.empty((30, 224, 224, 3))
+                    training_data[:15] = data[:15]
+                    training_data[15:] = data[20:35]
+                    training_labels = np.empty(30)
+                    training_labels[:15] = 0
+                    training_labels[15:] = 1
 
-                predictions = cat_model.predict(data)
-                print('Should be Cat (0)')
-                print(np.argmax(predictions[:20], axis=1))
-                print('Should be Dog (1)')
-                print(np.argmax(predictions[20:], axis=1))
+                    # The last 5 images for male and female cats will be used for validation
+                    validation_data = np.empty((10, 224, 224, 3))
+                    validation_data[:5] = data[15:20]
+                    validation_data[5:] = data[35:]
+                    validation_labels = np.empty(10)
+                    validation_labels[:5] = 0
+                    validation_labels[5:] = 1
 
-                # The first 15 images for male and female cats will be used for training
-                training_data = np.empty((30, 224, 224, 3))
-                training_data[:15] = data[:15]
-                training_data[15:] = data[20:35]
-                training_labels = np.empty(30)
-                training_labels[:15] = 0
-                training_labels[15:] = 1
+                    
+                    cat_output2 = Dense(2, activation='softmax')
+                    cat_output2 = cat_output2(model.layers[-2].output)
+                    cat_input2 = model.input
+                    cat_model2 = Model(inputs=cat_input2, outputs=cat_output2)
+                    for layer in cat_model2.layers[:-1]:
+                        layer.trainable = False
 
-                # The last 5 images for male and female cats will be used for validation
-                validation_data = np.empty((10, 224, 224, 3))
-                validation_data[:5] = data[15:20]
-                validation_data[5:] = data[35:]
-                validation_labels = np.empty(10)
-                validation_labels[:5] = 0
-                validation_labels[5:] = 1
+                    cat_model2.compile(
+                        optimizer='adam',
+                        loss='sparse_categorical_crossentropy',
+                        metrics=['accuracy'])
+                    
+                    cat_model2.fit(
+                        x=training_data,
+                        y=training_labels,
+                        validation_data=(validation_data, validation_labels),
+                        epochs=5,
+                        verbose=2)
 
-                 
-                cat_output2 = Dense(2, activation='softmax')
-                cat_output2 = cat_output2(model.layers[-2].output)
-                cat_input2 = model.input
-                cat_model2 = Model(inputs=cat_input2, outputs=cat_output2)
-                for layer in cat_model2.layers[:-1]:
-                    layer.trainable = False
-                cat_model2.compile(
-                    optimizer='adam',
-                    loss='sparse_categorical_crossentropy',
-                    metrics=['accuracy'])
-                
-                cat_model2.fit(
-                    x=training_data,
-                    y=training_labels,
-                    validation_data=(validation_data, validation_labels),
-                    epochs=5,
-                    verbose=2)
+                    # Bild auf Größe (224, 224) skalieren
+                    
+                    for image_file in image_files:
+                        if image_file is not None:
+                            # Open the image using PIL
+                            img = Image.open(image_file)
 
+                            # Resize the image to (224, 224)
+                            img_resized = img.resize((224, 224))
 
-                predictions = cat_model2.predict(data)
-                print('Should be Cat (0)')
-                print(np.argmax(predictions[:20], axis=1))
-                print('Should be Dog (1)')
-                print(np.argmax(predictions[20:], axis=1))
+                            # Convert the image to a NumPy array
+                            img_array = np.array(img_resized)
 
-                # Bild laden
-                img = imageio.imread(image_file)
+                            # Ensure the array has the correct shape for the model input (1, 224, 224, 3)
+                            data = np.empty((1, 224, 224, 3))
+                            data[0] = img_array
 
-                # Bild auf Größe (224, 224) skalieren
-                img_resized = Image.fromarray(img).resize((224, 224))
+                            # Make a prediction using the model
+                            predictions = cat_model2.predict(data)
 
-                # Bild in das numpy Array einfügen
-                data = np.empty((1, 224, 224, 3))
-                data[0] = np.array(img_resized)
-                data = preprocess_input(data)
+                            predictions_df = pd.DataFrame({
+                                'Label': ['Cat', 'Dog'],
+                                'Probability': predictions[0]
+                            })
 
-                #Prediciton 
+                            # Zeige den DataFrame in der Streamlit-App an
+                            st.markdown("## Predictions")
+                            st.dataframe(predictions_df)
 
-                predictions = cat_model2.predict(data)
-                print(predictions)
-                st.markdown("## Predictions")
-                st.write(predictions)
-                print('Should be Cat (0)')
-                print(np.argmax(predictions[:20], axis=1))
-                print('Should be Dog (1)')
-                print(np.argmax(predictions[20:], axis=1))
 
 
 
