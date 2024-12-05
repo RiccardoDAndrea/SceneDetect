@@ -8,6 +8,7 @@ from keras.applications.mobilenet_v2 import MobileNetV2
 from keras.applications.mobilenet_v2 import decode_predictions
 from keras.optimizers import Adam, SGD, RMSprop, Adadelta, Adagrad
 from keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, Dense, Flatten
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import layers, models
 from keras.applications.mobilenet_v2 import MobileNetV2
@@ -47,8 +48,7 @@ else:
     # Model selection
     options = st.multiselect(
         "Which Models to test",
-        ["MobileNetV2", "SENET", "ViT"],
-    )
+        ["MobileNetV2", "SENET", "ViT"],)
     
 
 
@@ -159,65 +159,76 @@ else:
                     for layer in model.layers[:-3]:  # Entferne alle Layer ab der drittletzten Schicht
                         new_layers.append(layer)
 
-                    # Füge deine eigenen Layer hinzu
-                    from tensorflow.keras.layers import Conv2D, Dense, Flatten
 
                     # Hier wird ein neuer Dense-Layer hinzugefügt
                     x = Dense(256, activation='relu')(model.layers[-5].output)
                     x = Conv2D(32, (3, 3), activation='relu', padding='same')(model.layers[-3].output)
                     x = Flatten()(x)
-                    x = Dense(64, activation='relu')(model.layers[-2].output)  # z. B. der drittletzte Layer
+                    x = Dense(64, activation='relu')(model.layers[-2].output)
                     x = Dense(2, activation='softmax')(x)  # Dein eigener Ausgabeschicht
 
                     # Erstelle das neue Modell
                     new_model = Model(inputs=model.input, outputs=x)
                     
 
-                    # Optional: Alle Layer außer dem letzten Layer nicht trainierbar machen
+                    #Alle Layer außer dem letzten Layer nicht trainierbar machen
                     for layer in new_model.layers[:-1]:
                         layer.trainable = False
                     
-
-
+                    
+                    optimizer_col, loss_col = st.columns(2)
+                    
+                    with optimizer_col:
+                        optimizer_user = st.multiselect("Select your Optimizer", 
+                                                        ["Adam","Error"])
+                    
+                    with loss_col:
+                        loss_user = st.multiselect("Select your loss", 
+                                                    ["sparse_categorical_crossentropy","Error"])
+                    
+                    
                     new_model.compile(
-                        optimizer='adam',
-                        loss='sparse_categorical_crossentropy',
+                        optimizer=optimizer_user[0],
+                        loss=loss_user[0],
                         metrics=['accuracy'])
                     
-                    new_model.fit(
-                        x=training_data,
-                        y=training_labels,
-                        validation_data=(validation_data, validation_labels),
-                        epochs=5,
-                        verbose=2)
-                    # Bild auf Größe (224, 224) skalieren
-                    
-                    for image_file in image_files:
-                        if image_file is not None:
-                            # Open the image using PIL
-                            img = Image.open(image_file)
+                    train_button = st.button("Train your Model")
+                    if train_button:
 
-                            # Resize the image to (224, 224)
-                            img_resized = img.resize((224, 224))
+                        new_model.fit(
+                            x=training_data,
+                            y=training_labels,
+                            validation_data=(validation_data, validation_labels),
+                            epochs=5,
+                            verbose=2)
+                        
+                        
+                        for image_file in image_files:
+                            if image_file is not None:
+                                # Open the image using PIL
+                                img = Image.open(image_file)
 
-                            # Convert the image to a NumPy array
-                            img_array = np.array(img_resized)
 
-                            # Ensure the array has the correct shape for the model input (1, 224, 224, 3)
-                            data = np.empty((1, 224, 224, 3))
-                            data[0] = img_array
+                                img_resized = img.resize((224, 224))
 
-                            # Make a prediction using the model
-                            predictions = new_model.predict(data)
+                                # Convert the image to a NumPy array
+                                img_array = np.array(img_resized)
 
-                            predictions_df = pd.DataFrame({
-                                'Label': ['Cat', 'Dog'],
-                                'Probability': predictions[0]
-                            })
+                                # Ensure the array has the correct shape for the model input (1, 224, 224, 3)
+                                data = np.empty((1, 224, 224, 3))
+                                data[0] = img_array
 
-                            # Zeige den DataFrame in der Streamlit-App an
-                            st.markdown("## Predictions")
-                            st.dataframe(predictions_df)
+                                # Make a prediction using the model
+                                predictions = new_model.predict(data)
+
+                                predictions_df = pd.DataFrame({
+                                    'Label': ['Cat', 'Dog'],
+                                    'Probability': predictions[0]
+                                })
+
+                                # Zeige den DataFrame in der Streamlit-App an
+                                st.markdown("## Predictions")
+                                st.dataframe(predictions_df)
 
 
 
