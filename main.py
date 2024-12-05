@@ -5,6 +5,7 @@ from PIL import Image
 import pandas as pd
 from keras.applications.mobilenet_v2 import preprocess_input
 from keras.applications.mobilenet_v2 import MobileNetV2
+from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
 from keras.applications.mobilenet_v2 import decode_predictions
 from keras.optimizers import Adam, SGD, RMSprop, Adadelta, Adagrad
 from keras.models import Sequential
@@ -82,7 +83,7 @@ else:
 
                 #Prediciton 
                 predictions = base_model.predict(data)
-
+            
                 st.write('Shape: {}'.format(predictions.shape))
                 output_neuron = np.argmax(predictions[0])
                 print('Most active neuron: {} ({:.2f})'.format(
@@ -129,8 +130,6 @@ else:
                     labels[:20] = 0
                     labels[20:] = 1
 
-                    
-
                     # Add layer to the base model
                     st.markdown("Create your Mobilenetv2 Model")
                     
@@ -155,80 +154,131 @@ else:
 ####### C R E A T E _ M O D E L ##############################
 ##############################################################
                     
-                    new_layers = []
-                    for layer in model.layers[:-3]:  # Entferne alle Layer ab der drittletzten Schicht
-                        new_layers.append(layer)
 
 
-                    # Hier wird ein neuer Dense-Layer hinzugefügt
-                    x = Dense(256, activation='relu')(model.layers[-5].output)
-                    x = Conv2D(32, (3, 3), activation='relu', padding='same')(model.layers[-3].output)
-                    x = Flatten()(x)
-                    x = Dense(64, activation='relu')(model.layers[-2].output)
-                    x = Dense(2, activation='softmax')(x)  # Dein eigener Ausgabeschicht
+                    # User input for the number of layers
+                    number_layers = st.number_input("Number of Layers", min_value=1, max_value=3, step=1)
 
-                    # Erstelle das neue Modell
-                    new_model = Model(inputs=model.input, outputs=x)
+                    layer_types = []
+                    units = []
+                    activations = []
+
+                    for i in range(number_layers):
+                        st.write(f"Layer {i+1}")
+
+                        layer_col, units_col, activation_col = st.columns(3)
+                        with layer_col:
+                            layer_type = st.selectbox(f'Layer {i+1} Type', 
+                                                      ['Dense', 'Conv2D', 'Maxpooling', 'Flatten'], 
+                                                      key=f'layer_type_{i}')
+                            layer_types.append(layer_type)
+
+                        with units_col:
+                            unit = st.number_input(f'Units in Layer {i+1}', 
+                                                   min_value=1, max_value=512, 
+                                                   value=64, step=1, key=f'units_{i}')
+                            units.append(unit)
+
+                        with activation_col:
+                            activation = st.selectbox("Activation:", ["relu", "softmax", "sigmoid"], 
+                                                      key=f'activation_{i}')
+                            activations.append(activation)
+
+                    # Build the model based on user input
+                    model = Sequential()
+                    for i in range(number_layers):
+
+                        if layer_types[i] == 'Dense':
+                            model.add(Dense(units[i], activation=activations[i]))
+                        
+                        elif layer_types[i] == 'Conv2D':
+                            model.add(Conv2D(units[i], (3, 3), activation=activations[i], padding='same'))
+                        
+                        elif layer_types[i] == 'Maxpooling':
+                            model.add(MaxPooling2D(pool_size=(2, 2)))
+                        
+                        elif layer_types[i] == 'Flatten':
+                            model.add(Flatten())
+
+                    
                     
 
-                    #Alle Layer außer dem letzten Layer nicht trainierbar machen
-                    for layer in new_model.layers[:-1]:
-                        layer.trainable = False
-                    
-                    
-                    optimizer_col, loss_col = st.columns(2)
-                    
-                    with optimizer_col:
-                        optimizer_user = st.multiselect("Select your Optimizer", 
-                                                        ["Adam","Error"])
-                    
-                    with loss_col:
-                        loss_user = st.multiselect("Select your loss", 
-                                                    ["sparse_categorical_crossentropy","Error"])
-                    
-                    
-                    new_model.compile(
-                        optimizer=optimizer_user[0],
-                        loss=loss_user[0],
-                        metrics=['accuracy'])
-                    
-                    train_button = st.button("Train your Model")
-                    if train_button:
 
-                        new_model.fit(
-                            x=training_data,
-                            y=training_labels,
-                            validation_data=(validation_data, validation_labels),
-                            epochs=5,
-                            verbose=2)
+                    # new_layers = []
+                    # for layer in model.layers[:-3]:  # Entferne alle Layer ab der drittletzten Schicht
+                    #     new_layers.append(layer)
+
+                    # x = Dense(256, activation='relu')(model.layers[-5].output)
+                    # x = Conv2D(32, (3, 3), activation='relu', padding='same')(model.layers[-3].output)
+                    # x = Flatten()(x)
+                    # x = Dense(64, activation='relu')(model.layers[-2].output)
+                    # x = Dense(2, activation='softmax')(x)  # Dein eigener Ausgabeschicht
+
+                    # # Erstelle das neue Modell
+                    # new_model = Model(inputs=model.input, outputs=x)
+                    
+
+                    # #Alle Layer außer dem letzten Layer nicht trainierbar machen
+                    # for layer in new_model.layers[:-1]:
+                    #     layer.trainable = False
+                    
+                    
+                    
+                    
+                    # # Spalten für die Benutzerinteraktion
+                    # optimizer_col, loss_col = st.columns(2)
+
+                    # with optimizer_col:
+                    #     optimizer_user = st.selectbox("Select your Optimizer", ["Adam", "SGD", "RMSprop", "Adagrad"])
+
+                    # with loss_col:
+                    #     loss_user = st.selectbox("Select your Loss", ["sparse_categorical_crossentropy", "categorical_crossentropy", "mean_squared_error"])
+
+                    # # Sicherstellen, dass die Benutzerwahl gültig ist
+                    # if optimizer_user and loss_user:
+                    #     new_model.compile(
+                    #         optimizer=optimizer_user,
+                    #         loss=loss_user,
+                    #         metrics=['accuracy']
+                    #     )
+
+                    # train_button = st.button("Train your Model")
+                    # if train_button:
+
+                    #     new_model.fit(
+                    #         x=training_data,
+                    #         y=training_labels,
+                    #         validation_data=(validation_data, validation_labels),
+                    #         epochs=5,
+                    #         verbose=2)
                         
                         
-                        for image_file in image_files:
-                            if image_file is not None:
-                                # Open the image using PIL
-                                img = Image.open(image_file)
+                    #     for image_file in image_files:
+                    #         if image_file is not None:
+                    #             # Open the image using PIL
+                    #             img = Image.open(image_file)
 
 
-                                img_resized = img.resize((224, 224))
+                    #             img_resized = img.resize((224, 224))
 
-                                # Convert the image to a NumPy array
-                                img_array = np.array(img_resized)
+                    #             # Convert the image to a NumPy array
+                    #             img_array = np.array(img_resized)
 
-                                # Ensure the array has the correct shape for the model input (1, 224, 224, 3)
-                                data = np.empty((1, 224, 224, 3))
-                                data[0] = img_array
+                    #             # Ensure the array has the correct shape for the model input (1, 224, 224, 3)
+                    #             data = np.empty((1, 224, 224, 3))
+                    #             data[0] = img_array
 
-                                # Make a prediction using the model
-                                predictions = new_model.predict(data)
+                    #             # Make a prediction using the model
+                    #             predictions = new_model.predict(data)
 
-                                predictions_df = pd.DataFrame({
-                                    'Label': ['Cat', 'Dog'],
-                                    'Probability': predictions[0]
-                                })
+                    #             predictions_df = pd.DataFrame({
+                    #                 'Label': ['Cat', 'Dog'],
+                    #                 'Probability': predictions[0]
+                    #             })
 
-                                # Zeige den DataFrame in der Streamlit-App an
-                                st.markdown("## Predictions")
-                                st.dataframe(predictions_df)
+                    #             # Zeige den DataFrame in der Streamlit-App an
+                    #             st.markdown("## Predictions")
+                    #             st.dataframe(predictions_df)
 
 
 
