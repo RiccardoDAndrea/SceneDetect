@@ -1,10 +1,12 @@
 # venv
 project
 venv
-
+model
+arch
 # images
 Data
-cats_and_dogs_small
+cats_and_dogs_small/
 user_pictures
 Stanford dogs.v3i.yolov11
 outputfolder
+cats_vs_dogs_small
