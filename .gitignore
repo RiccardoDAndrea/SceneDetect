@@ -1,8 +1,9 @@
 # venv
 project
 venv
-
+cuda
 arch
+tef
 # images
 Data
 cats_and_dogs_small/
