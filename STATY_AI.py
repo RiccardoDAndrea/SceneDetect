@@ -42,80 +42,151 @@ with file_uploder_col_2:
         #st.image(image_files, use_container_width=True)
     
 # Model selection
-st.divider()
 options = st.selectbox(
     "Which Models to test",
     ["Own Model","MobileNetV2", 
         "SENET", "ViT"],
 )
-
+st.divider()
 if "Own Model" in options:
     st.write("Own Model")
+    
     # User input for the number of layers
-    number_layers = st.number_input("Number of Layers", min_value=1, max_value=3, step=1)
+    number_layers = st.number_input("Number of Layers", min_value=1, max_value=10, step=1)
 
+    # Initialize storage lists
     layer_types = []
+    filters = []
+    kernels = []
+    pool_sizes = []
     units = []
     activations = []
 
+    # Loop through each layer
     for i in range(number_layers):
-        st.write(f"Layer {i+1}")
+        st.divider()
+        # Select the layer type
+        layer_type = st.selectbox(
+            f'Layer {i+1} Type', 
+            ['Dense', 'Conv2D', 'Maxpooling', 'Flatten'], 
+            key=f'layer_type_{i}'
+        )
+        layer_types.append(layer_type)
 
-        layer_col, units_col, activation_col = st.columns(3)
+        if layer_type == "Conv2D":
+            # Create input columns for Conv2D layer
+            filter_col, kernel_size_col, activation_col = st.columns(3)
+            with filter_col:
+                filter = st.number_input(
+                    f'Filters (Layer {i+1})', 
+                    min_value=1, max_value=64, 
+                    value=32, step=1, key=f'filter_{i}'
+                )
+                filters.append(filter)
 
+            with kernel_size_col:
+                kernel_size = st.number_input(
+                    f'Kernel Size (Layer {i+1})', 
+                    min_value=1, max_value=10, 
+                    value=3, step=1, key=f'kernel_size_{i}'
+                )
+                kernels.append(kernel_size)
 
-        with layer_col:
-            layer_type = st.selectbox(f'Layer {i+1} Type', 
-                                        ['Dense', 'Conv2D', 'Maxpooling', 'Flatten'], 
-                                        key=f'layer_type_{i}')
-            layer_types.append(layer_type)
+            with activation_col:
+                activation = st.selectbox(
+                    f'Activation (Layer {i+1})', 
+                    ['relu', 'sigmoid', 'tanh'], 
+                    key=f'activation_{i}'
+                )
+                activations.append(activation)
 
+        elif layer_type == "Dense":
+            # Create input columns for Dense layer
+            units_col, activation_col = st.columns(2)
+            with units_col:
+                unit = st.number_input(
+                    f'Units (Layer {i+1})', 
+                    min_value=1, max_value=512, 
+                    value=128, step=1, key=f'units_{i}'
+                )
+                units.append(unit)
 
-        with units_col:
-            unit_int = st.number_input(f'Units in Layer {i+1}', 
-                                    min_value=1, max_value=512, 
-                                    value=64, step=1, key=f'units_{i}')
-            units.append(unit_int)
+            with activation_col:
+                activation = st.selectbox(
+                    f'Activation (Layer {i+1})', 
+                    ['relu', 'sigmoid', 'tanh'], 
+                    key=f'activation_dense_{i}'
+                )
+                activations.append(activation)
 
+        elif layer_type == "MaxPooling2D":
+            # Create input for Maxpooling layer
+            pool_size_col, _ = st.columns(2)
+            with pool_size_col:
+                pool_size = st.number_input(
+                    f'Pool Size (Layer {i+1})', 
+                    min_value=1, max_value=5, 
+                    value=2, step=1, key=f'pool_size_{i}'
+                )
+                pool_sizes.append(pool_size)
 
-        with activation_col:
-            activation = st.selectbox(f'Activation in Layer {i+1}', 
-                                        ['relu', 'sigmoid', 'tanh', 'softmax'], 
-                                        key=f'activation_{i}')
-            activations.append(activation)
+        elif layer_type == "Flatten":
+            st.write("No additional parameters needed for Flatten layer.")
 
+    
 
-    # Create model thorw user Input
-    st.write("Model Created")
-
-
+    # Input layer
     inputs = keras.Input(shape=(180, 180, 3))
+
+    # Data Augmentation layer
     data_augmentation = keras.Sequential(
-    [
-        layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.1),
-        layers.RandomZoom(0.2),
-    ])
-    
-    for i in range(number_layers):
-        x = data_augmentation(inputs)
-    
-        if layer_types[i] == "Dense":
-            x = layers.Dense(units[i], activation=activations[i])(x)
-        elif layer_types[i] == "Conv2D":
-            x = layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
-        elif layer_types[i] == "Maxpooling":
-            x = layers.MaxPooling2D(pool_size=2)(x)
-        elif layer_types[i] == "Flatten":
-            x = layers.Flatten()(x)
-        
-    #st.write(x.summary())
-    
+        [
+            layers.RandomFlip("horizontal"),
+            layers.RandomRotation(0.1),
+            layers.RandomZoom(0.2),
+        ]
+    )
+    x = data_augmentation(inputs)  # Apply data augmentation once
 
-    inputs = keras.Input(shape=(180, 180, 3))
+    # Build layers dynamically
+    for i in range(number_layers):
+        layer_type = layer_types[i]
+        
+        if layer_type == "Conv2D":
+            x = layers.Conv2D(filters=filters[i], kernel_size=kernels[i], activation=activations[i])(x)
+        
+        elif layer_type == "Dense":
+            # Add Dense layer only after Flatten
+            if "Flatten" not in layer_types[:i]:
+                st.warning(f"Dense layer at position {i+1} might need a preceding Flatten layer.")
+            x = layers.Dense(units[i], activation=activations[i])(x)
+
+        elif layer_type == "MaxPooling2D":
+            x = layers.MaxPooling2D(pool_size=pool_sizes[i])(x)
+
+        elif layer_type == "Flatten":
+            x = layers.Flatten()(x)
+
+    # Add output layer
+    
+    st.write("Specify Output Layer")
+    output_units = st.number_input("Output Units", min_value=1, value=1, step=1)
+    
+    output_activation = st.selectbox("Output Activation", ["sigmoid", "softmax", "linear"])
+    
+    outputs = layers.Dense(output_units, activation=output_activation)(x)
+
+    # Create the model
+    model = keras.Model(inputs=inputs, outputs=outputs)
+
+
+
+
+
+    # inputs = keras.Input(shape=(180, 180, 3))
     # x = data_augmentation(inputs)
     # x = layers.Rescaling(1./255)(x)
-    # x = layers.layer_types(filters=32, kernel_size=3, activation="relu")(x)
+    # x = layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
     # x = layers.MaxPooling2D(pool_size=2)(x)
     # x = layers.Conv2D(filters=64, kernel_size=3, activation="relu")(x)
     # x = layers.MaxPooling2D(pool_size=2)(x)
