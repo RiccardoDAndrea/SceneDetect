@@ -2,6 +2,11 @@ import streamlit as st
 import imageio.v2 as imageio 
 from tensorflow import keras
 from tensorflow.keras import layers
+import tensorflow as tf
+from tensorflow.keras.utils import image_dataset_from_directory
+
+
+st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide", initial_sidebar_state="expanded")
 
 # Title
 st.title("STATY AI")
@@ -9,10 +14,13 @@ st.title("STATY AI")
 # Display image uploader
 
 
-
 file_uploder_col_1, file_uploder_col_2 = st.columns(2)
 with file_uploder_col_1:
-    image_files_1 = st.file_uploader("Upload your Pictures", accept_multiple_files=True, type=["jpg", "jpeg", "png"], key="file_uploader_1")
+    image_files_1 = st.file_uploader("Upload your Pictures", 
+                                    accept_multiple_files=True, 
+                                    type=["jpg", "jpeg", "png"], 
+                                    key="file_uploader_1")
+
     for image_file in image_files_1:
         img = imageio.imread(image_file)
 
@@ -27,7 +35,10 @@ with file_uploder_col_1:
 
 
 with file_uploder_col_2:
-    image_files_2 = st.file_uploader("Upload your Pictures", accept_multiple_files=True, type=["jpg", "jpeg", "png"], key="file_uploader_2")
+    image_files_2 = st.file_uploader("Upload your Pictures", 
+                                    accept_multiple_files=True, 
+                                    type=["jpg", "jpeg", "png"], 
+                                    key="file_uploader_2")
 
     for image_file in image_files_2:
         img = imageio.imread(image_file)
@@ -40,7 +51,42 @@ with file_uploder_col_2:
         # Display the uploaded image
         st.success("Uploaded successfully "+ str(int(len(image_files_2)))+" images")
         #st.image(image_files, use_container_width=True)
+
+train_dataset = image_dataset_from_directory(
+                image_files_1,
+                image_size=(180, 180),
+                batch_size=32)
     
+validation_dataset = image_dataset_from_directory(
+                    image_files_2,
+                    image_size=(180, 180),
+                    batch_size=32)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Model selection
 options = st.selectbox(
     "Which Models to test",
@@ -68,7 +114,7 @@ if "Own Model" in options:
         # Select the layer type
         layer_type = st.selectbox(
             f'Layer {i+1} Type', 
-            ['Dense', 'Conv2D', 'Maxpooling', 'Flatten'], 
+            ['Dense', 'Conv2D', 'MaxPooling2D', 'Flatten'], 
             key=f'layer_type_{i}'
         )
         layer_types.append(layer_type)
@@ -146,61 +192,49 @@ if "Own Model" in options:
             layers.RandomZoom(0.2),
         ]
     )
-    x = data_augmentation(inputs)  # Apply data augmentation once
+    x = data_augmentation(inputs)  # Start with augmented input
 
     # Build layers dynamically
     for i in range(number_layers):
         layer_type = layer_types[i]
         
         if layer_type == "Conv2D":
-            x = layers.Conv2D(filters=filters[i], kernel_size=kernels[i], activation=activations[i])(x)
+            if i < len(filters) and i < len(kernels) and i < len(activations):
+                x = layers.Conv2D(filters=filters[i], kernel_size=kernels[i], activation=activations[i])(x)
+            #else:
+            #    st.error(f"Missing configuration for Conv2D layer at position {i+1}. Check your input.")
         
         elif layer_type == "Dense":
-            # Add Dense layer only after Flatten
-            if "Flatten" not in layer_types[:i]:
-                st.warning(f"Dense layer at position {i+1} might need a preceding Flatten layer.")
-            x = layers.Dense(units[i], activation=activations[i])(x)
-
+            if i < len(units) and i < len(activations):
+                x = layers.Dense(units[i], activation=activations[i])(x)
+            #else:
+            #    st.error(f"Missing configuration for Dense layer at position {i+1}. Check your input.")
+        
         elif layer_type == "MaxPooling2D":
-            x = layers.MaxPooling2D(pool_size=pool_sizes[i])(x)
-
+            if i < len(pool_sizes):
+                x = layers.MaxPooling2D(pool_size=pool_sizes[i])(x)
+            #else:
+            #    st.error(f"Missing pool size for Maxpooling layer at position {i+1}. Check your input.")
+        
         elif layer_type == "Flatten":
             x = layers.Flatten()(x)
 
-    # Add output layer
-    
-    st.write("Specify Output Layer")
-    output_units = st.number_input("Output Units", min_value=1, value=1, step=1)
-    
-    output_activation = st.selectbox("Output Activation", ["sigmoid", "softmax", "linear"])
-    
-    outputs = layers.Dense(output_units, activation=output_activation)(x)
+    # Final output layer
+    outputs = layers.Dense(1, activation="sigmoid")(x)  # Example output layer
 
     # Create the model
     model = keras.Model(inputs=inputs, outputs=outputs)
 
 
-
-
-
-    # inputs = keras.Input(shape=(180, 180, 3))
-    # x = data_augmentation(inputs)
-    # x = layers.Rescaling(1./255)(x)
-    # x = layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
-    # x = layers.MaxPooling2D(pool_size=2)(x)
-    # x = layers.Conv2D(filters=64, kernel_size=3, activation="relu")(x)
-    # x = layers.MaxPooling2D(pool_size=2)(x)
-    # x = layers.Conv2D(filters=128, kernel_size=3, activation="relu")(x)
-    # x = layers.MaxPooling2D(pool_size=2)(x)
-    # x = layers.Conv2D(filters=256, kernel_size=3, activation="relu")(x)
-    # x = layers.MaxPooling2D(pool_size=2)(x)
-    # x = layers.Conv2D(filters=256, kernel_size=3, activation="relu")(x)
-    # x = layers.Flatten()(x)
-    # x = layers.Dropout(0.5)(x)
-    # outputs = layers.Dense(1, activation="sigmoid")(x)
-    # model = keras.Model(inputs=inputs, outputs=outputs)
-
-
+    model.compile(loss="binary_crossentropy",
+            optimizer="rmsprop",
+            metrics=["accuracy"])
+    
+    with tf.device('/GPU:0'):
+        history = model.fit(
+        image_files_1,
+        epochs=3,
+        validation_data=image_files_2)
     # st.write("Model Summary")
     # st.write("Model Training")
     # st.write("Model Evaluation")
