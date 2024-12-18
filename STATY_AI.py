@@ -12,7 +12,7 @@ st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide", initi
 st.title("STATY AI")
 
 
-genre = st.radio(
+ImageClassification_radio = st.radio(
     "Image Classification",
     ["One Way", "Two way"],
     captions=[
@@ -22,30 +22,21 @@ genre = st.radio(
     horizontal=True
 )
 
-if genre == "One Way":
+if ImageClassification_radio == "One Way":
     st.write("You selected comedy.")
 
-elif genre == "Two way":
+elif ImageClassification_radio == "Two way":
 
     # Define directories for uploaded images
     train_dir = "UploadedFile/Train"
     train_dir_class_1 = "UploadedFile/Train/class_1"
     train_dir_class_2 = "UploadedFile/Train/class_2"
-    validation_dir = "UploadedFile/Validation"
-    validation_class_1 = "UploadedFile/Validation/class_1"
-    validation_class_2 = "UploadedFile/Validation/class_2"
 
 
     os.makedirs(train_dir, exist_ok=True)
     if not os.path.exists(train_dir_class_1):
         os.makedirs(train_dir_class_1, exist_ok=True)
         os.makedirs(train_dir_class_2, exist_ok=True)
-
-    os.makedirs(validation_dir, exist_ok=True)
-    if not os.path.exists(validation_class_1):
-        os.makedirs(validation_class_1, exist_ok=True)
-        os.makedirs(validation_class_2, exist_ok=True)
-
 
     # File upload columns
     file_uploader_col_1, file_uploader_col_2 = st.columns(2)
@@ -62,14 +53,15 @@ elif genre == "Two way":
             for image_file in image_files_1:
                 # Read and save the file to the training directory
                 img = imageio.imread(image_file)
-                save_path = os.path.join(train_dir, image_file.name)
+                save_path = os.path.join(train_dir_class_1, image_file.name)
                 imageio.imsave(save_path, img)
 
+        
             st.success(f"Uploaded {len(image_files_1)} training images.")
         else:
             st.warning("Please upload at least one training image.")
+            
 
-    # Validation Dataset Upload
     with file_uploader_col_2:
         image_files_2 = st.file_uploader(
             "Upload the second Class Images", 
@@ -81,42 +73,30 @@ elif genre == "Two way":
             for image_file in image_files_2:
                 # Read and save the file to the validation directory
                 img = imageio.imread(image_file)
-                save_path = os.path.join(validation_dir, image_file.name)
+                save_path = os.path.join(train_dir_class_2, image_file.name)
                 imageio.imsave(save_path, img)
 
             st.success(f"Uploaded {len(image_files_2)} validation images.")
         else:
             st.warning("Please upload at least one validation image.")
+            st.stop()
 
 
-
-
-
-
-
-
-
-    # Create datasets using image_dataset_from_directory
-    if os.listdir(train_dir) and os.listdir(validation_dir):
-        st.write("Creating datasets...")
 
         train_dataset = image_dataset_from_directory(
             train_dir,
             image_size=(180, 180),
             batch_size=32
         )
+        print(train_dataset)
         
         validation_dataset = image_dataset_from_directory(
-            validation_dir,
+            "Validation_data",
             image_size=(180, 180),
             batch_size=32
         )
 
-        st.success("Datasets created successfully.")
-    else:
-        st.warning("Make sure both training and validation images are uploaded.")
-
-
+    
 
 
     #####################################################################
@@ -267,9 +247,9 @@ elif genre == "Two way":
         
         with tf.device('/GPU:0'):
             history = model.fit(
-            train_dir,
+            train_dataset,
             epochs=3,
-            validation_data=validation_dir)
+            validation_data=validation_dataset)
 
 
         # st.write("Model Summary")
