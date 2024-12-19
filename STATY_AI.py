@@ -109,10 +109,10 @@ elif ImageClassification_radio == "Two way":
     )
     st.divider()
     if "Own Model" in options:
-        st.write("Own Model")
+        st.markdown("#### Create your infracture")
         
         # User input for the number of layers
-        number_layers = st.number_input("Number of Layers", min_value=1, max_value=10, step=1)
+        number_layers = st.number_input("Number of Layers", min_value=1, max_value=20, step=1)
 
         # Initialize storage lists
         layer_types = []
@@ -239,17 +239,66 @@ elif ImageClassification_radio == "Two way":
 
         # Create the model
         model = keras.Model(inputs=inputs, outputs=outputs)
+        st.divider()
+        st.markdown("#### Compile Model")
 
+        loss_col, optimizer_col = st.columns(2)
 
+        with loss_col:
+            loss = st.selectbox(
+                "Loss Function",
+                ["Binary Crossentropy", "Categorical Crossentropy", "Mean Squared Error"],
+                key="loss"
+            )
+        
+        with optimizer_col:
+            optimizer = st.selectbox(
+                "Optimizer",
+                ["Adam", "RMSprop", "SGD"],
+                key="optimizer"
+            )
         model.compile(loss="binary_crossentropy",
                 optimizer="rmsprop",
                 metrics=["accuracy"])
         
+
+
         with tf.device('/GPU:0'):
-            history = model.fit(
-            train_dataset,
-            epochs=3,
-            validation_data=validation_dataset)
+            try:
+                # Train the model
+                history = model.fit(
+                    train_dataset,
+                    epochs=3,
+                    validation_data=validation_dataset
+                )
+                st.success("Model training completed successfully.")
+            except ValueError as e:
+                error_message = str(e)
+                if "Arguments `target` and `output` must have the same rank (ndim). Received: target.shape=(None,), output.shape=(None, 180, 180, 1)" in error_message:
+                    st.error(
+                        "Shape mismatch detected: The output shape of the model does not match the target labels. "
+                        "Ensure the output layer configuration matches the dataset labels. "
+                        "For binary classification, use `Dense(1, activation='sigmoid')`."
+                    )
+                    st.info(
+                            """
+                            Your model should have the following configuration for binary classification:
+                            
+                                - Input layer: `Input(shape=(180, 180, 3))`
+                                - Conv2D with filters (32), kernel size (3), and activation functions (relu)
+                                - MaxPooling2D with pool size (2)
+                                - Conv2D with filters (64), kernel size (3), and activation functions (relu)
+                                - MaxPooling2D with pool size (2)
+                                - Conv2D with filters (128), kernel size (3), and activation functions (relu)
+                                - Flatten layer
+                                - Output layer: `Dense(1, activation='sigmoid')`
+                                
+                            """
+                     
+                    )
+                else:
+                    st.error(f"An unexpected error occurred: {error_message}")
+                st.stop()
 
 
         # st.write("Model Summary")
