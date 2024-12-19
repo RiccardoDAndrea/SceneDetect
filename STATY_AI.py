@@ -257,6 +257,7 @@ elif ImageClassification_radio == "Two way":
                 ["Adam", "RMSprop", "SGD"],
                 key="optimizer"
             )
+
         model.compile(loss="binary_crossentropy",
                 optimizer="rmsprop",
                 metrics=["accuracy"])
@@ -264,6 +265,7 @@ elif ImageClassification_radio == "Two way":
 
 
         with tf.device('/GPU:0'):
+            
             try:
                 # Train the model
                 history = model.fit(
@@ -272,8 +274,11 @@ elif ImageClassification_radio == "Two way":
                     validation_data=validation_dataset
                 )
                 st.success("Model training completed successfully.")
+            
             except ValueError as e:
                 error_message = str(e)
+                # One of the most commen issues get fetch from the error message
+                # and User get a example Archtiketure.
                 if "Arguments `target` and `output` must have the same rank (ndim). Received: target.shape=(None,), output.shape=(None, 180, 180, 1)" in error_message:
                     st.error(
                         "Shape mismatch detected: The output shape of the model does not match the target labels. "
@@ -301,11 +306,7 @@ elif ImageClassification_radio == "Two way":
                 st.stop()
 
 
-        # st.write("Model Summary")
-        # st.write("Model Training")
-        # st.write("Model Evaluation")
-        # st.write("Model Prediction")
-        # st.write("Model Visualization")
+        
 
 
 
