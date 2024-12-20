@@ -3,6 +3,7 @@ import imageio.v2 as imageio
 from tensorflow import keras
 from tensorflow.keras import layers
 import tensorflow as tf
+import pandas as pd
 from tensorflow.keras.utils import image_dataset_from_directory
 import os
 
@@ -140,7 +141,7 @@ elif ImageClassification_radio == "Two way":
                 with filter_col:
                     filter = st.number_input(
                         f'Filters (Layer {i+1})', 
-                        min_value=1, max_value=64, 
+                        min_value=1, max_value=1000, 
                         value=32, step=1, key=f'filter_{i}'
                     )
                     filters.append(filter)
@@ -241,74 +242,102 @@ elif ImageClassification_radio == "Two way":
         model = keras.Model(inputs=inputs, outputs=outputs)
         st.divider()
         st.markdown("#### Compile Model")
-
-        loss_col, optimizer_col = st.columns(2)
+        ###### User Interface for Compile Model
+        
+        loss_col, optimizer_col, epochs_col = st.columns(3)
 
         with loss_col:
             loss = st.selectbox(
                 "Loss Function",
-                ["Binary Crossentropy", "Categorical Crossentropy", "Mean Squared Error"],
+                ["binary_crossentropy", "categorical_crossentropy", "mean_squared_error"],
                 key="loss"
             )
         
         with optimizer_col:
             optimizer = st.selectbox(
                 "Optimizer",
-                ["Adam", "RMSprop", "SGD"],
+                ["Adam", "rmsprop", "SGD"],
                 key="optimizer"
             )
 
-        model.compile(loss="binary_crossentropy",
-                optimizer="rmsprop",
-                metrics=["accuracy"])
+        with epochs_col:
+            epochs_user = st.number_input("Epochs", min_value=1, max_value=100, step=1, key="epochs")
         
+        
+        if st.button("Compile and Train Modell"):
+            model.compile(loss=loss,
+                    optimizer=optimizer,
+                    metrics=["accuracy"])
+            
 
 
-        with tf.device('/GPU:0'):
-            
-            try:
-                # Train the model
-                history = model.fit(
-                    train_dataset,
-                    epochs=3,
-                    validation_data=validation_dataset
-                )
-                st.success("Model training completed successfully.")
-            
-            except ValueError as e:
-                error_message = str(e)
-                # One of the most commen issues get fetch from the error message
-                # and User get a example Archtiketure.
-                if "Arguments `target` and `output` must have the same rank (ndim). Received: target.shape=(None,), output.shape=(None, 180, 180, 1)" in error_message:
-                    st.error(
-                        "Shape mismatch detected: The output shape of the model does not match the target labels. "
-                        "Ensure the output layer configuration matches the dataset labels. "
-                        "For binary classification, use `Dense(1, activation='sigmoid')`."
+            with tf.device('/GPU:0'):
+                
+                try:
+                    # Train the model
+                    history = model.fit(
+                        train_dataset,
+                        epochs=epochs_user,
+                        validation_data=validation_dataset
                     )
-                    st.info(
-                            """
-                            Your model should have the following configuration for binary classification:
-                            
-                                - Input layer: `Input(shape=(180, 180, 3))`
-                                - Conv2D with filters (32), kernel size (3), and activation functions (relu)
-                                - MaxPooling2D with pool size (2)
-                                - Conv2D with filters (64), kernel size (3), and activation functions (relu)
-                                - MaxPooling2D with pool size (2)
-                                - Conv2D with filters (128), kernel size (3), and activation functions (relu)
-                                - Flatten layer
-                                - Output layer: `Dense(1, activation='sigmoid')`
+                    st.success("Model training completed successfully.")
+                
+                except ValueError as e:
+                    error_message = str(e)
+                    # One of the most commen issues get fetch from the error message
+                    # and User get a example Archtiketure.
+                    if "Arguments `target` and `output` must have the same rank (ndim). Received: target.shape=(None,), output.shape=(None, 180, 180, 1)" in error_message:
+                        st.error(
+                            "Shape mismatch detected: The output shape of the model does not match the target labels. "
+                            "Ensure the output layer configuration matches the dataset labels. "
+                            "For binary classification, use `Dense(1, activation='sigmoid')`."
+                        )
+
+                        st.info(
+                                """
+                                Your model should have the following configuration for binary classification:
                                 
-                            """
-                     
-                    )
-                else:
-                    st.error(f"An unexpected error occurred: {error_message}")
-                st.stop()
+                                    - Input layer: `Input(shape=(180, 180, 3))`
+                                    - Conv2D with filters (32), kernel size (3), and activation functions (relu)
+                                    - MaxPooling2D with pool size (2)
+                                    - Conv2D with filters (64), kernel size (3), and activation functions (relu)
+                                    - MaxPooling2D with pool size (2)
+                                    - Conv2D with filters (128), kernel size (3), and activation functions (relu)
+                                    - Flatten layer
+                                    - Output layer: `Dense(1, activation='sigmoid')`
+                                    
+                                """
+                        
+                        )
+
+                    else:
+                        st.error(f"An unexpected error occurred: {error_message}")
+                    st.stop()
 
 
-        
+                st.divider()
+                ## Performance for the Model 
+
+                # Assuming `history` is a Keras training history object
+                accuracy = history.history["accuracy"]
+                val_accuracy = history.history["val_accuracy"]
+                loss = history.history["loss"]
+                val_loss = history.history["val_loss"]
+                epochs = range(1, len(accuracy) + 1)
+
+                # Create a DataFrame for plotting
+                data = pd.DataFrame({
+                    "Epoch": epochs,
+                    "Training accuracy": accuracy,
+                    "Validation accuracy": val_accuracy,
+                    "Loss": loss,
+                    "Validation Loss": val_loss
+                })
+                
+                # Plot the accuracy using Streamlit
+                st.line_chart(data[["Epoch", "Training accuracy"]])
+                st.line_chart(data[["Epoch", "Validation Loss"]])
 
 
-
-    
-
+                ## Creating Prediciton
+                
