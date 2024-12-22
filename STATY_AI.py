@@ -7,13 +7,13 @@ import pandas as pd
 from tensorflow.keras.utils import image_dataset_from_directory
 import os
 from tensorflow.keras.preprocessing import image
-
 import numpy as np
+
 st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide", initial_sidebar_state="expanded")
 
 # Title
 st.title("STATY AI")
-
+st.write("Das ist was wir test")
 
 ImageClassification_radio = st.radio(
     "Image Classification",
