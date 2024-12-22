@@ -1,4 +1,281 @@
-Das ist eine Ubersicht uber die Shortcuts 
+Neovim Keybings
+# Shortcuts 
 
 
+1. Navigieren und Bearbeiten
+Bewege den Cursor:
 
+h – Nach links
+j – Nach unten
+k – Nach oben
+l – Nach rechts
+w – Zum nächsten Wort
+b – Zum vorherigen Wort
+e – Zum Ende des Wortes
+0 – Zum Anfang der Zeile
+$ – Zum Ende der Zeile
+gg – Zum Anfang des Dokuments
+G – Zum Ende des Dokuments
+Ctrl-f – Eine Seite nach unten scrollen
+Ctrl-b – Eine Seite nach oben scrollen
+Bewege den Cursor innerhalb der Zeile:
+
+0 – Anfang der Zeile
+^ – Zum ersten nicht-leeren Zeichen der Zeile
+$ – Ende der Zeile
+Suchen:
+
+/text – Nach „text“ suchen (Vorwärts)
+?text – Nach „text“ suchen (Rückwärts)
+n – Zum nächsten Vorkommen springen (nach Suche)
+N – Zum vorherigen Vorkommen springen (nach Suche)
+Text kopieren und löschen:
+
+y – Kopieren (yank)
+yy – Ganze Zeile kopieren
+yw – Ein Wort kopieren
+y$ – Vom Cursor bis zum Zeilenende kopieren
+d – Löschen
+dd – Ganze Zeile löschen
+dw – Ein Wort löschen
+d$ – Vom Cursor bis zum Zeilenende löschen
+p – Einfügen nach dem Cursor (paste)
+P – Einfügen vor dem Cursor
+Text ersetzen:
+
+r<char> – Ersetzt das Zeichen unter dem Cursor mit <char>
+R – Ersetzt jedes Zeichen, während du tippst (Ersatzmodus)
+Text einfügen:
+
+i – In den Einfügemodus vor dem Cursor
+I – In den Einfügemodus am Anfang der Zeile
+a – In den Einfügemodus nach dem Cursor
+A – In den Einfügemodus am Ende der Zeile
+o – Neue Zeile unter der aktuellen Zeile einfügen
+O – Neue Zeile über der aktuellen Zeile einfügen
+Text zurücksetzen:
+
+u – Rückgängig machen (Undo)
+Ctrl-r – Wiederherstellen (Redo)
+2. Fenster und Register
+Fensteroperationen:
+
+Ctrl-w h – Wechsel zum Fenster links
+Ctrl-w j – Wechsel zum Fenster unten
+Ctrl-w k – Wechsel zum Fenster oben
+Ctrl-w l – Wechsel zum Fenster rechts
+Ctrl-w w – Zum nächsten Fenster wechseln
+Ctrl-w q – Fenster schließen
+Ctrl-w v – Neues vertikales Fenster öffnen
+Ctrl-w s – Neues horizontales Fenster öffnen
+Ctrl-w = – Alle Fenster gleich groß machen
+Tabellen und Register:
+
+:tabnew – Neuen Tab öffnen
+gt – Zum nächsten Tab wechseln
+gT – Zum vorherigen Tab wechseln
+:tabclose – Tab schließen
+3. Bearbeitungsbefehle
+Automatische Einrückung:
+
+>> – Zeile nach rechts einrücken
+<< – Zeile nach links einrücken
+Text wiederholen:
+
+. – Wiederhole den letzten Bearbeitungsschritt
+Markierungen und Selektionen:
+
+v – Visual Mode (Zeichenweise Auswahl)
+V – Visual Line Mode (Zeilenweise Auswahl)
+Ctrl-v – Visual Block Mode (Blockweise Auswahl)
+y – Text kopieren (Visual Mode)
+d – Text löschen (Visual Mode)
+> – Text einrücken (Visual Mode)
+< – Text ausrücken (Visual Mode)
+4. Dateimanagement
+Datei öffnen und speichern:
+
+:e dateiname – Datei öffnen
+:w – Datei speichern
+:wq – Datei speichern und Neovim schließen
+:q – Neovim schließen (wenn keine Änderungen vorgenommen wurden)
+:q! – Neovim schließen und alle Änderungen verwerfen
+:x – Datei speichern und Neovim schließen (Ähnlich wie :wq)
+Wechseln zwischen Dateien:
+
+:bnext oder :bn – Nächste Datei im Buffer wechseln
+:bprev oder :bp – Vorherige Datei im Buffer wechseln
+:bd – Aktuellen Buffer schließen
+:buffers – Liste aller geöffneten Dateien (Buffer)
+:e # – Wechsel zum vorherigen geöffneten Buffer
+5. Erweiterte Funktionen
+Makros:
+
+q<char> – Makro aufzeichnen (z.B. qa startet das Aufzeichnen in das Makro a)
+@<char> – Makro ausführen (z.B. @a führt das Makro a aus)
+@@ – Das zuletzNeovim Keybings
+# Shortcuts 
+
+
+1. Navigieren und Bearbeiten
+Bewege den Cursor:
+
+h – Nach links
+j – Nach unten
+k – Nach oben
+l – Nach rechts
+w – Zum nächsten Wort
+b – Zum vorherigen Wort
+e – Zum Ende des Wortes
+0 – Zum Anfang der Zeile
+$ – Zum Ende der Zeile
+gg – Zum Anfang des Dokuments
+G – Zum Ende des Dokuments
+Ctrl-f – Eine Seite nach unten scrollen
+Ctrl-b – Eine Seite nach oben scrollen
+Bewege den Cursor innerhalb der Zeile:
+
+0 – Anfang der Zeile
+^ – Zum ersten nicht-leeren Zeichen der Zeile
+$ – Ende der Zeile
+Suchen:
+
+/text – Nach „text“ suchen (Vorwärts)
+?text – Nach „text“ suchen (Rückwärts)
+n – Zum nächsten Vorkommen springen (nach Suche)
+N – Zum vorherigen Vorkommen springen (nach Suche)
+Text kopieren und löschen:
+
+y – Kopieren (yank)
+yy – Ganze Zeile kopieren
+yw – Ein Wort kopieren
+y$ – Vom Cursor bis zum Zeilenende kopieren
+d – Löschen
+dd – Ganze Zeile löschen
+dw – Ein Wort löschen
+d$ – Vom Cursor bis zum Zeilenende löschen
+p – Einfügen nach dem Cursor (paste)
+P – Einfügen vor dem Cursor
+Text ersetzen:
+
+r<char> – Ersetzt das Zeichen unter dem Cursor mit <char>
+R – Ersetzt jedes Zeichen, während du tippst (Ersatzmodus)
+Text einfügen:
+
+i – In den Einfügemodus vor dem Cursor
+I – In den Einfügemodus am Anfang der Zeile
+a – In den Einfügemodus nach dem Cursor
+A – In den Einfügemodus am Ende der Zeile
+o – Neue Zeile unter der aktuellen Zeile einfügen
+O – Neue Zeile über der aktuellen Zeile einfügen
+Text zurücksetzen:
+
+u – Rückgängig machen (Undo)
+Ctrl-r – Wiederherstellen (Redo)
+2. Fenster und Register
+Fensteroperationen:
+
+Ctrl-w h – Wechsel zum Fenster links
+Ctrl-w j – Wechsel zum Fenster unten
+Ctrl-w k – Wechsel zum Fenster oben
+Ctrl-w l – Wechsel zum Fenster rechts
+Ctrl-w w – Zum nächsten Fenster wechseln
+Ctrl-w q – Fenster schließen
+Ctrl-w v – Neues vertikales Fenster öffnen
+Ctrl-w s – Neues horizontales Fenster öffnen
+Ctrl-w = – Alle Fenster gleich groß machen
+Tabellen und Register:
+
+:tabnew – Neuen Tab öffnen
+gt – Zum nächsten Tab wechseln
+gT – Zum vorherigen Tab wechseln
+:tabclose – Tab schließen
+3. Bearbeitungsbefehle
+Automatische Einrückung:
+
+>> – Zeile nach rechts einrücken
+<< – Zeile nach links einrücken
+Text wiederholen:
+
+. – Wiederhole den letzten Bearbeitungsschritt
+Markierungen und Selektionen:
+
+v – Visual Mode (Zeichenweise Auswahl)
+V – Visual Line Mode (Zeilenweise Auswahl)
+Ctrl-v – Visual Block Mode (Blockweise Auswahl)
+y – Text kopieren (Visual Mode)
+d – Text löschen (Visual Mode)
+> – Text einrücken (Visual Mode)
+< – Text ausrücken (Visual Mode)
+4. Dateimanagement
+Datei öffnen und speichern:
+
+:e dateiname – Datei öffnen
+:w – Datei speichern
+:wq – Datei speichern und Neovim schließen
+:q – Neovim schließen (wenn keine Änderungen vorgenommen wurden)
+:q! – Neovim schließen und alle Änderungen verwerfen
+:x – Datei speichern und Neovim schließen (Ähnlich wie :wq)
+Wechseln zwischen Dateien:
+
+:bnext oder :bn – Nächste Datei im Buffer wechseln
+:bprev oder :bp – Vorherige Datei im Buffer wechseln
+:bd – Aktuellen Buffer schließen
+:buffers – Liste aller geöffneten Dateien (Buffer)
+:e # – Wechsel zum vorherigen geöffneten Buffer
+5. Erweiterte Funktionen
+Makros:
+
+q<char> – Makro aufzeichnen (z.B. qa startet das Aufzeichnen in das Makro a)
+@<char> – Makro ausführen (z.B. @a führt das Makro a aus)
+@@ – Das zuletzt ausgeführte Makro erneut ausführen
+Suchen und Ersetzen:
+
+:s/alt/neu/g – Ersetzt alle Vorkommen von „alt“ durch „neu“ in der aktuellen Zeile
+:%s/alt/neu/g – Ersetzt alle Vorkommen von „alt“ durch „neu“ im gesamten Dokument
+:s/alt/neu/gc – Ersetzt alle Vorkommen von „alt“ durch „neu“ und fragt nach Bestätigung
+6. Tastenkombinationen in Neovim
+Erweiterte Bearbeitungsfunktionen:
+
+Ctrl-w + = – Fenster auf gleiche Größe setzen
+Ctrl-x + Ctrl-f – Dateisuche öffnen (falls Plugins wie fzf oder telescope installiert sind)
+Ctrl-r – Rückgängig machen
+Ctrl-h – Löschen eines Zeichens
+Terminal im Neovim (wenn das Plugin toggleterm installiert ist):
+
+<Leader>t – Terminal umschalten (öffnet/ schließt das Terminal)
+7. Erweiterte Textsuchen
+Inhalt durchsuchen:
+Ctrl-d – Eine Seite nach unten scrollen
+Ctrl-u – Eine Seite nach oben scrollen
+* – Nächstes Vorkommen des Wortes unter dem Cursor suchen (Vorwärts)
+# – Nächstes Vorkommen des Wortes unter dem Cursor suchen (Rückwärts)
+
+
+:q quit nvim
+i Insert Modus t ausgeführte Makro erneut ausführen
+Suchen und Ersetzen:
+
+:s/alt/neu/g – Ersetzt alle Vorkommen von „alt“ durch „neu“ in der aktuellen Zeile
+:%s/alt/neu/g – Ersetzt alle Vorkommen von „alt“ durch „neu“ im gesamten Dokument
+:s/alt/neu/gc – Ersetzt alle Vorkommen von „alt“ durch „neu“ und fragt nach Bestätigung
+6. Tastenkombinationen in Neovim
+Erweiterte Bearbeitungsfunktionen:
+
+Ctrl-w + = – Fenster auf gleiche Größe setzen
+Ctrl-x + Ctrl-f – Dateisuche öffnen (falls Plugins wie fzf oder telescope installiert sind)
+Ctrl-r – Rückgängig machen
+Ctrl-h – Löschen eines Zeichens
+Terminal im Neovim (wenn das Plugin toggleterm installiert ist):
+
+<Leader>t – Terminal umschalten (öffnet/ schließt das Terminal)
+7. Erweiterte Textsuchen
+Inhalt durchsuchen:
+Ctrl-d – Eine Seite nach unten scrollen
+Ctrl-u – Eine Seite nach oben scrollen
+* – Nächstes Vorkommen des Wortes unter dem Cursor suchen (Vorwärts)
+# – Nächstes Vorkommen des Wortes unter dem Cursor suchen (Rückwärts)
+
+
+:q quit nvim
+i Insert Modus 

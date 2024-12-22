@@ -9,11 +9,10 @@ import os
 from tensorflow.keras.preprocessing import image
 import numpy as np
 
-st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide", initial b_sidebar_state="expanded")
+st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide")
 
 # Title
 st.title("STATY AI")
-st.write("Das ist was wir test")
 
 ImageClassification_radio = st.radio(
     "Image Classification",
@@ -78,7 +77,7 @@ elif ImageClassification_radio == "Two way":
                 "Upload the second Class Images", 
                 accept_multiple_files=True, 
                 type=["jpg", "jpeg", "png"], 
-                key="file_uploader_2")
+                    key="file_uploader_2")
 
             if image_files_2:
                 for image_file in image_files_2:
@@ -345,9 +344,9 @@ elif ImageClassification_radio == "Two way":
 
                 # Interpret the prediction
                 if prediction[0] > 0.5:
-                    st.write("The image depicts a **dog**.")
+                    st.write(f"The image depicts a {name_class_1}.")
                 else:
-                    st.write("The image depicts a **cat**.")
+                    st.write(f"The image depicts a {name_class_2}.")
 
                 # Display prediction probability
                 st.write(f"Prediction probability for dog: {prediction[0][0]:.2f}")
