@@ -217,7 +217,7 @@ elif ImageClassification_radio == "Two way":
                 layers.RandomFlip("horizontal"),
                 layers.RandomRotation(0.1),
                 layers.RandomZoom(0.2),
-            ]
+                ]
         )
         x = data_augmentation(inputs)  # Start with augmented input
 
@@ -274,9 +274,10 @@ elif ImageClassification_radio == "Two way":
         with epochs_col:
             epochs_user = st.number_input("Epochs", min_value=1, max_value=100, step=1, key="epochs")
         
-
+        if "training_completed" not in st.session_state:
+            st.session_state.training_completed = False
         # Compile and train model
-        if st.button("Compile and Train Model") and not st.session_state.training_completed:
+        if st.button( "Compile and Train Model") and not st.session_state.training_completed:
             try:
                 # Compile the model
                 model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
@@ -323,30 +324,30 @@ elif ImageClassification_radio == "Two way":
                     st.error(f"An unexpected error occurred: {error_message}")
                 st.stop()
 
-        # Model Testing Section
-        if st.session_state.training_completed:
-            st.divider()
-            st.markdown("### Test your Model:")
-            uploaded_image = st.file_uploader("Upload an image to test your model")
+            # Model Testing Section
+            if st.session_state.training_completed:
+                st.divider()
+                st.markdown("### Test your Model:")
+                uploaded_image = st.file_uploader("Upload an image to test your model")
 
-            if uploaded_image is not None:
-                # Load and preprocess the uploaded image
-                img = image.load_img(uploaded_image, target_size=(180, 180))
+                if uploaded_image is not None:
+                    # Load and preprocess the uploaded image
+                    img = image.load_img(uploaded_image, target_size=(180, 180))
 
-                st.image(img, caption="Uploaded Image")
+                    st.image(img, caption="Uploaded Image")
 
-                img_array = image.img_to_array(img)
+                    img_array = image.img_to_array(img)
 
-                img_array = np.expand_dims(img_array, axis=0)
+                    img_array = np.expand_dims(img_array, axis=0)
 
-                # Make a prediction
-                prediction = model.predict(img_array)
+                    # Make a prediction
+                    prediction = model.predict(img_array)
 
-                # Interpret the prediction
-                if prediction[0] > 0.5:
-                    st.write(f"The image depicts a {name_class_1}.")
-                else:
-                    st.write(f"The image depicts a {name_class_2}.")
+                    # Interpret the prediction
+                    if prediction[0] > 0.5:
+                        st.write(f"The image depicts a {name_class_1}.")
+                    else:
+                        st.write(f"The image depicts a {name_class_2}.")
 
-                # Display prediction probability
-                st.write(f"Prediction probability for dog: {prediction[0][0]:.2f}")
+                        # Display prediction probability
+                        st.write(f"Prediction probability for dog: {prediction[0][0]:.2f}")

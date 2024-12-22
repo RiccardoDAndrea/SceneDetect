@@ -277,5 +277,6 @@ Ctrl-u – Eine Seite nach oben scrollen
 # – Nächstes Vorkommen des Wortes unter dem Cursor suchen (Rückwärts)
 
 
+Ordner Löschen / e
 :q quit nvim
 i Insert Modus 
