@@ -9,7 +9,7 @@ import os
 from tensorflow.keras.preprocessing import image
 import numpy as np
 
-st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide", initial b_sidebar_state="expanded")
 
 # Title
 st.title("STATY AI")
