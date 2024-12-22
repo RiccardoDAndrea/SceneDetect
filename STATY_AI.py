@@ -6,7 +6,9 @@ import tensorflow as tf
 import pandas as pd
 from tensorflow.keras.utils import image_dataset_from_directory
 import os
+from tensorflow.keras.preprocessing import image
 
+import numpy as np
 st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide", initial_sidebar_state="expanded")
 
 # Title
@@ -28,76 +30,86 @@ if ImageClassification_radio == "One Way":
 
 elif ImageClassification_radio == "Two way":
 
+    name_class1_col, name_class2_col = st.columns(2)
+    with name_class1_col:
+        name_class_1 = st.text_input("Name Class 1", key="Name Class 1")
+
+    with name_class2_col:
+        name_class_2 = st.text_input("Name Class 2", key="Name Class 2")   
     # Define directories for uploaded images
-    train_dir = "UploadedFile/Train"
-    train_dir_class_1 = "UploadedFile/Train/class_1"
-    train_dir_class_2 = "UploadedFile/Train/class_2"
-
-
-    os.makedirs(train_dir, exist_ok=True)
-    if not os.path.exists(train_dir_class_1):
-        os.makedirs(train_dir_class_1, exist_ok=True)
-        os.makedirs(train_dir_class_2, exist_ok=True)
-
-    # File upload columns
-    file_uploader_col_1, file_uploader_col_2 = st.columns(2)
-
-    # Train Dataset Upload
-    with file_uploader_col_1:
-        image_files_1 = st.file_uploader(
-            "Upload the first Class Images", 
-            accept_multiple_files=True, 
-            type=["jpg", "jpeg", "png"], 
-            key="file_uploader_1")
-
-        if image_files_1:
-            for image_file in image_files_1:
-                # Read and save the file to the training directory
-                img = imageio.imread(image_file)
-                save_path = os.path.join(train_dir_class_1, image_file.name)
-                imageio.imsave(save_path, img)
-
+    if name_class_1 and name_class_2:
         
-            st.success(f"Uploaded {len(image_files_1)} training images.")
-        else:
-            st.warning("Please upload at least one training image.")
+        train_dir = "UploadedFile/Train"
+        train_dir_class_1 = f"UploadedFile/Train/{name_class_1}"
+        train_dir_class_2 = f"UploadedFile/Train/{name_class_2}"
+
+
+        os.makedirs(train_dir, exist_ok=True)
+        if not os.path.exists(train_dir_class_1):
+            os.makedirs(train_dir_class_1, exist_ok=True)
+            os.makedirs(train_dir_class_2, exist_ok=True)
+
+        # File upload columns
+        file_uploader_col_1, file_uploader_col_2 = st.columns(2)
+
+        # Train Dataset Upload
+        with file_uploader_col_1:
+            image_files_1 = st.file_uploader(
+                "Upload the first Class Images", 
+                accept_multiple_files=True, 
+                type=["jpg", "jpeg", "png"], 
+                key="file_uploader_1")
+
+            if image_files_1:
+                for image_file in image_files_1:
+                    # Read and save the file to the training directory
+                    img = imageio.imread(image_file)
+                    save_path = os.path.join(train_dir_class_1, image_file.name)
+                    imageio.imsave(save_path, img)
+
             
+                st.success(f"Uploaded {len(image_files_1)} training images.")
+            else:
+                st.warning("Please upload at least one training image.")
+                
 
-    with file_uploader_col_2:
-        image_files_2 = st.file_uploader(
-            "Upload the second Class Images", 
-            accept_multiple_files=True, 
-            type=["jpg", "jpeg", "png"], 
-            key="file_uploader_2")
+        with file_uploader_col_2:
+            image_files_2 = st.file_uploader(
+                "Upload the second Class Images", 
+                accept_multiple_files=True, 
+                type=["jpg", "jpeg", "png"], 
+                key="file_uploader_2")
 
-        if image_files_2:
-            for image_file in image_files_2:
-                # Read and save the file to the validation directory
-                img = imageio.imread(image_file)
-                save_path = os.path.join(train_dir_class_2, image_file.name)
-                imageio.imsave(save_path, img)
+            if image_files_2:
+                for image_file in image_files_2:
+                    # Read and save the file to the validation directory
+                    img = imageio.imread(image_file)
+                    save_path = os.path.join(train_dir_class_2, image_file.name)
+                    imageio.imsave(save_path, img)
 
-            st.success(f"Uploaded {len(image_files_2)} validation images.")
-        else:
-            st.warning("Please upload at least one validation image.")
-            st.stop()
+                st.success(f"Uploaded {len(image_files_2)} validation images.")
+            else:
+                st.warning("Please upload at least one validation image.")
+                st.stop()
 
 
 
-        train_dataset = image_dataset_from_directory(
-            train_dir,
-            image_size=(180, 180),
-            batch_size=32
-        )
-        print(train_dataset)
+            train_dataset = image_dataset_from_directory(
+                train_dir,
+                image_size=(180, 180),
+                batch_size=32
+            )
+            print(train_dataset)
+            
+            validation_dataset = image_dataset_from_directory(
+                "Validation_data",
+                image_size=(180, 180),
+                batch_size=32
+            )
+    else:
+        st.stop()
+
         
-        validation_dataset = image_dataset_from_directory(
-            "Validation_data",
-            image_size=(180, 180),
-            batch_size=32
-        )
-
-    
 
 
     #####################################################################
@@ -263,81 +275,79 @@ elif ImageClassification_radio == "Two way":
         with epochs_col:
             epochs_user = st.number_input("Epochs", min_value=1, max_value=100, step=1, key="epochs")
         
-        
-        if st.button("Compile and Train Modell"):
-            model.compile(loss=loss,
-                    optimizer=optimizer,
-                    metrics=["accuracy"])
-            
 
+        # Compile and train model
+        if st.button("Compile and Train Model") and not st.session_state.training_completed:
+            try:
+                # Compile the model
+                model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
+                st.info("Model compilation successful.")
 
-            with tf.device('/GPU:0'):
-                
-                try:
-                    # Train the model
+                # Train the model
+                with tf.device('/GPU:0'):
                     history = model.fit(
                         train_dataset,
                         epochs=epochs_user,
                         validation_data=validation_dataset
                     )
-                    st.success("Model training completed successfully.")
-                
-                except ValueError as e:
-                    error_message = str(e)
-                    # One of the most commen issues get fetch from the error message
-                    # and User get a example Archtiketure.
-                    if "Arguments `target` and `output` must have the same rank (ndim). Received: target.shape=(None,), output.shape=(None, 180, 180, 1)" in error_message:
-                        st.error(
-                            "Shape mismatch detected: The output shape of the model does not match the target labels. "
-                            "Ensure the output layer configuration matches the dataset labels. "
-                            "For binary classification, use `Dense(1, activation='sigmoid')`."
-                        )
 
-                        st.info(
-                                """
-                                Your model should have the following configuration for binary classification:
-                                
-                                    - Input layer: `Input(shape=(180, 180, 3))`
-                                    - Conv2D with filters (32), kernel size (3), and activation functions (relu)
-                                    - MaxPooling2D with pool size (2)
-                                    - Conv2D with filters (64), kernel size (3), and activation functions (relu)
-                                    - MaxPooling2D with pool size (2)
-                                    - Conv2D with filters (128), kernel size (3), and activation functions (relu)
-                                    - Flatten layer
-                                    - Output layer: `Dense(1, activation='sigmoid')`
-                                    
-                                """
-                        
-                        )
+                # Update session state
+                st.session_state.training_completed = True
+                st.success("Model training completed successfully.")
 
-                    else:
-                        st.error(f"An unexpected error occurred: {error_message}")
-                    st.stop()
-
-
+                # Divider
                 st.divider()
-                ## Performance for the Model 
 
-                # Assuming `history` is a Keras training history object
-                accuracy = history.history["accuracy"]
-                val_accuracy = history.history["val_accuracy"]
-                loss = history.history["loss"]
-                val_loss = history.history["val_loss"]
-                epochs = range(1, len(accuracy) + 1)
+            except ValueError as e:
+                error_message = str(e)
+                if "Arguments `target` and `output` must have the same rank (ndim)" in error_message:
+                    st.error(
+                        "Shape mismatch detected: The output shape of the model does not match the target labels. "
+                        "Ensure the output layer configuration matches the dataset labels. "
+                        "For binary classification, use `Dense(1, activation='sigmoid')`."
+                    )
+                    st.info(
+                        """
+                        Your model should have the following configuration for binary classification:
+                        
+                            - Input layer: `Input(shape=(180, 180, 3))`
+                            - Conv2D with filters (32), kernel size (3), and activation (`relu`)
+                            - MaxPooling2D with pool size (2)
+                            - Conv2D with filters (64), kernel size (3), and activation (`relu`)
+                            - MaxPooling2D with pool size (2)
+                            - Conv2D with filters (128), kernel size (3), and activation (`relu`)
+                            - Flatten layer
+                            - Output layer: `Dense(1, activation='sigmoid')`
+                        """
+                    )
+                else:
+                    st.error(f"An unexpected error occurred: {error_message}")
+                st.stop()
 
-                # Create a DataFrame for plotting
-                data = pd.DataFrame({
-                    "Epoch": epochs,
-                    "Training accuracy": accuracy,
-                    "Validation accuracy": val_accuracy,
-                    "Loss": loss,
-                    "Validation Loss": val_loss
-                })
-                
-                # Plot the accuracy using Streamlit
-                st.line_chart(data[["Epoch", "Training accuracy"]])
-                st.line_chart(data[["Epoch", "Validation Loss"]])
+        # Model Testing Section
+        if st.session_state.training_completed:
+            st.divider()
+            st.markdown("### Test your Model:")
+            uploaded_image = st.file_uploader("Upload an image to test your model")
 
+            if uploaded_image is not None:
+                # Load and preprocess the uploaded image
+                img = image.load_img(uploaded_image, target_size=(180, 180))
 
-                ## Creating Prediciton
-                
+                st.image(img, caption="Uploaded Image")
+
+                img_array = image.img_to_array(img)
+
+                img_array = np.expand_dims(img_array, axis=0)
+
+                # Make a prediction
+                prediction = model.predict(img_array)
+
+                # Interpret the prediction
+                if prediction[0] > 0.5:
+                    st.write("The image depicts a **dog**.")
+                else:
+                    st.write("The image depicts a **cat**.")
+
+                # Display prediction probability
+                st.write(f"Prediction probability for dog: {prediction[0][0]:.2f}")

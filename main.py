@@ -5,7 +5,7 @@ from PIL import Image
 import pandas as pd
 from keras.applications.mobilenet_v2 import preprocess_input
 from keras.applications.mobilenet_v2 import MobileNetV2
-from keras.applications.mobilenet_v2 import decode_predictions
+from keras.applications.mobilenet_v2 import decode_prediction:
 from keras.optimizers import Adam, SGD, RMSprop, Adadelta, Adagrad
 from keras.models import Sequential
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -189,7 +189,7 @@ else:
                             data[0] = img_array
 
                             # Make a prediction using the model
-                            predictions = cat_model2.predict(data)
+                                predictions = cat_model2.predict(data)
 
                             predictions_df = pd.DataFrame({
                                 'Label': ['Cat', 'Dog'],
