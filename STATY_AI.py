@@ -325,29 +325,29 @@ elif ImageClassification_radio == "Two way":
                 st.stop()
 
             # Model Testing Section
-            if st.session_state.training_completed:
-                st.divider()
-                st.markdown("### Test your Model:")
-                uploaded_image = st.file_uploader("Upload an image to test your model")
+            #if st.session_state.training_completed:
+            st.divider()
+            st.markdown("### Test your Model:")
+            uploaded_image = st.file_uploader("Upload an image to test your model")
 
-                if uploaded_image is not None:
-                    # Load and preprocess the uploaded image
-                    img = image.load_img(uploaded_image, target_size=(180, 180))
+            if uploaded_image is not None:
+                # Load and preprocess the uploaded image
+                img = image.load_img(uploaded_image, target_size=(180, 180))
 
-                    st.image(img, caption="Uploaded Image")
+                st.image(img, caption="Uploaded Image")
 
-                    img_array = image.img_to_array(img)
+                img_array = image.img_to_array(img)
 
-                    img_array = np.expand_dims(img_array, axis=0)
+                img_array = np.expand_dims(img_array, axis=0)
 
-                    # Make a prediction
-                    prediction = model.predict(img_array)
+                # Make a prediction
+                prediction = model.predict(img_array)
 
-                    # Interpret the prediction
-                    if prediction[0] > 0.5:
-                        st.write(f"The image depicts a {name_class_1}.")
-                    else:
-                        st.write(f"The image depicts a {name_class_2}.")
+                # Interpret the prediction
+                if prediction[0] > 0.5:
+                    st.write(f"The image depicts a {name_class_1}.")
+                else:
+                    st.write(f"The image depicts a {name_class_2}.")
 
-                        # Display prediction probability
-                        st.write(f"Prediction probability for dog: {prediction[0][0]:.2f}")
+                    # Display prediction probability
+                    st.write(f"Prediction probability for dog: {prediction[0][0]:.2f}")
