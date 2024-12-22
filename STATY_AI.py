@@ -274,17 +274,25 @@ elif ImageClassification_radio == "Two way":
         with epochs_col:
             epochs_user = st.number_input("Epochs", min_value=1, max_value=100, step=1, key="epochs")
         
+        # Initialize session state for training status
         if "training_completed" not in st.session_state:
             st.session_state.training_completed = False
+
         # Compile and train model
-        if st.button( "Compile and Train Model") and not st.session_state.training_completed:
+        if st.button("Compile and Train Model") and not st.session_state.training_completed:
             try:
                 # Compile the model
                 model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
                 st.info("Model compilation successful.")
 
+                # Check for GPU availability
+                if tf.config.list_physical_devices('GPU'):
+                    st.info("GPU detected. Training on GPU.")
+                else:
+                    st.warning("No GPU detected. Training will proceed on CPU.")
+
                 # Train the model
-                with tf.device('/GPU:0'):
+                with tf.device('/GPU:0' if tf.config.list_physical_devices('GPU') else '/CPU:0'):
                     history = model.fit(
                         train_dataset,
                         epochs=epochs_user,
@@ -294,8 +302,6 @@ elif ImageClassification_radio == "Two way":
                 # Update session state
                 st.session_state.training_completed = True
                 st.success("Model training completed successfully.")
-
-                # Divider
                 st.divider()
 
             except ValueError as e:
@@ -309,7 +315,7 @@ elif ImageClassification_radio == "Two way":
                     st.info(
                         """
                         Your model should have the following configuration for binary classification:
-                        
+
                             - Input layer: `Input(shape=(180, 180, 3))`
                             - Conv2D with filters (32), kernel size (3), and activation (`relu`)
                             - MaxPooling2D with pool size (2)
@@ -324,30 +330,42 @@ elif ImageClassification_radio == "Two way":
                     st.error(f"An unexpected error occurred: {error_message}")
                 st.stop()
 
-            # Model Testing Section
-            #if st.session_state.training_completed:
+        # Model Testing Section
+        if st.session_state.training_completed:
             st.divider()
             st.markdown("### Test your Model:")
-            uploaded_image = st.file_uploader("Upload an image to test your model")
+            uploaded_image = st.file_uploader("Upload an image to test your model", type=["png", "jpg", "jpeg"])
 
             if uploaded_image is not None:
-                # Load and preprocess the uploaded image
-                img = image.load_img(uploaded_image, target_size=(180, 180))
+                try:
+                    # Load and preprocess the uploaded image
+                    from PIL import Image
+                    img = Image.open(uploaded_image).convert("RGB")
+                    img_resized = img.resize((180, 180))
+                    st.image(img, caption="Uploaded Image", use_column_width=True)
 
-                st.image(img, caption="Uploaded Image")
+                    # Convert image to array
+                    img_array = np.array(img_resized) / 255.0  # Normalize pixel values
+                    img_array = np.expand_dims(img_array, axis=0)
 
-                img_array = image.img_to_array(img)
+                    # Make a prediction
+                    prediction = model.predict(img_array)
 
-                img_array = np.expand_dims(img_array, axis=0)
+                    # Interpret the prediction
+                    class_1_prob = prediction[0][0]
+                    class_2_prob = 1 - class_1_prob
 
-                # Make a prediction
-                prediction = model.predict(img_array)
+                    if class_1_prob > 0.5:
+                        st.write(f"The image depicts a **{name_class_1}**.")
+                    else:
+                        st.write(f"The image depicts a **{name_class_2}**.")
 
-                # Interpret the prediction
-                if prediction[0] > 0.5:
-                    st.write(f"The image depicts a {name_class_1}.")
-                else:
-                    st.write(f"The image depicts a {name_class_2}.")
+                    # Display prediction probabilities
+                    st.write(f"Prediction probability for {name_class_1}: {class_1_prob:.2f}")
+                    st.write(f"Prediction probability for {name_class_2}: {class_2_prob:.2f}")
 
-                    # Display prediction probability
-                    st.write(f"Prediction probability for dog: {prediction[0][0]:.2f}")
+                except Exception as e:
+                    st.error(f"An error occurred while processing the image: {e}")
+            else:
+                st.info("Please upload an image to test the model.")
+
