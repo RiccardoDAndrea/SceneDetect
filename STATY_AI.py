@@ -8,6 +8,9 @@ from tensorflow.keras.utils import image_dataset_from_directory
 import os
 from tensorflow.keras.preprocessing import image
 import numpy as np
+from tensorflow.keras.datasets import cifar100
+import os
+CUDA_VISIBLE_DEVICES=""
 
 st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide")
 
@@ -56,7 +59,7 @@ elif ImageClassification_radio == "Two way":
             image_files_1 = st.file_uploader(
                 "Upload the first Class Images", 
                 accept_multiple_files=True, 
-                type=["jpg", "jpeg", "png"], 
+                type=["jpg", "jpeg", "png","JPEG"], 
                 key="file_uploader_1")
 
             if image_files_1:
@@ -101,10 +104,14 @@ elif ImageClassification_radio == "Two way":
             print(train_dataset)
             
             validation_dataset = image_dataset_from_directory(
-                "Validation_data",
+                "Validation/",
                 image_size=(180, 180),
                 batch_size=32
             )
+            print("===================================")
+            print(validation_dataset)
+            print("===================================")
+    
     else:
         st.stop()
 
@@ -220,7 +227,7 @@ elif ImageClassification_radio == "Two way":
                 ]
         )
         x = data_augmentation(inputs)  # Start with augmented input
-
+        #x = layers.Rescaling(1./255)(x)
         # Build layers dynamically
         for i in range(number_layers):
             layer_type = layer_types[i]
@@ -285,19 +292,14 @@ elif ImageClassification_radio == "Two way":
                 model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
                 st.info("Model compilation successful.")
 
-                # Check for GPU availability
-                if tf.config.list_physical_devices('GPU'):
-                    st.info("GPU detected. Training on GPU.")
-                else:
-                    st.warning("No GPU detected. Training will proceed on CPU.")
-
+                
                 # Train the model
-                with tf.device('/GPU:0' if tf.config.list_physical_devices('GPU') else '/CPU:0'):
-                    history = model.fit(
-                        train_dataset,
-                        epochs=epochs_user,
-                        validation_data=validation_dataset
-                    )
+                
+                history = model.fit(
+                    train_dataset,
+                    epochs=epochs_user,
+                    validation_data=validation_dataset
+                )
 
                 # Update session state
                 st.session_state.training_completed = True
