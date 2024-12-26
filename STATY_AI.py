@@ -13,10 +13,6 @@ import os
 from PIL import Image
 import shutil
 
-
-
-
-
 st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide")
 
 # Title
@@ -74,12 +70,20 @@ elif ImageClassification_radio == "Two way":
                 key="file_uploader_1")
 
             if image_files_1:
-                for image_file in image_files_1:
-                    # Read and save the file to the training directory
-                    img = imageio.imread(image_file)
-                    save_path = os.path.join(train_dir_class_1, image_file.name)
-                    imageio.imsave(save_path, img)
-
+                for idx, image_file in enumerate(image_files_1):
+                    try:
+                        # Open and process image using Pillow
+                        img = Image.open(image_file)
+                        if img.mode == "RGBA":
+                            img = img.convert("RGB")
+                        
+                        # Define unique save path
+                        save_path = os.path.join(train_dir_class_1, f"{idx}_{image_file.name}")
+                        img.save(save_path, format="PNG")
+                    
+                    except Exception as e:
+                        st.error(f"Fehler beim Verarbeiten von {image_file.name}: {e}")
+            
             
                 st.success(f"Uploaded {len(image_files_1)} training images.")
             else:
@@ -94,11 +98,19 @@ elif ImageClassification_radio == "Two way":
                     key="file_uploader_2")
 
             if image_files_2:
-                for image_file in image_files_2:
-                    # Read and save the file to the validation directory
-                    img = imageio.imread(image_file)
-                    save_path = os.path.join(train_dir_class_2, image_file.name)
-                    imageio.imsave(save_path, img)
+                for idx, image_file in enumerate(image_files_2):
+                    try:
+                        # Open and process image using Pillow
+                        img = Image.open(image_file)
+                        if img.mode == "RGBA":
+                            img = img.convert("RGB")
+                        
+                        # Define unique save path
+                        save_path = os.path.join(train_dir_class_2, f"{idx}_{image_file.name}")
+                        img.save(save_path, format="PNG")
+
+                    except Exception as e:
+                        st.error(f"Fehler beim Verarbeiten von {image_file.name}: {e}")  
 
                 st.success(f"Uploaded {len(image_files_2)} validation images.")
             else:
@@ -115,7 +127,7 @@ elif ImageClassification_radio == "Two way":
             print(train_dataset)
             
             validation_dataset = image_dataset_from_directory(
-                "Validation/",
+                "Validation",
                 image_size=(180, 180),
                 batch_size=32
             )
@@ -225,6 +237,7 @@ elif ImageClassification_radio == "Two way":
 
         # Input layer
         inputs = keras.Input(shape=(180, 180, 3))
+        
 
         # Data Augmentation layer
         data_augmentation = keras.Sequential(
@@ -235,7 +248,7 @@ elif ImageClassification_radio == "Two way":
                 ]
         )
         x = data_augmentation(inputs)  # Start with augmented input
-        x = layers.Rescaling(1./255)(x)
+        #x = layers.Rescaling(1./255)(x)
         # Build layers dynamically
         for i in range(number_layers):
             layer_type = layer_types[i]
@@ -262,7 +275,8 @@ elif ImageClassification_radio == "Two way":
                 x = layers.Flatten()(x)
 
         # Final output layer
-        outputs = layers.Dense(1, activation="sigmoid")(x)  # Example output layer
+        x = layers.Dropout(0.5)(x)
+        outputs = layers.Dense(unit, activation=activation)(x)  # Example output layer
 
         # Create the model
         model = keras.Model(inputs=inputs, outputs=outputs)
@@ -294,15 +308,20 @@ elif ImageClassification_radio == "Two way":
             st.session_state.training_completed = False
 
         # Compile and train model
+        # Reset training flag if user wants to train again
+        if st.button("Reset Training Status"):
+            st.session_state.training_completed = False
+            st.info("Training status has been reset. You can train the model again.")
+
+        # Button to compile and train the model
         if st.button("Compile and Train Model") and not st.session_state.training_completed:
             try:
                 # Compile the model
-                model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
+                model.compile(loss=loss, optimizer=optimizer, 
+                              metrics=["accuracy"])
                 st.info("Model compilation successful.")
-
                 
                 # Train the model
-                
                 history = model.fit(
                     train_dataset,
                     epochs=epochs_user,
@@ -310,6 +329,8 @@ elif ImageClassification_radio == "Two way":
                 )
 
                 # Update session state
+                st.session_state.model = model
+                st.session_state.history = history.history 
                 st.session_state.training_completed = True
                 st.success("Model training completed successfully.")
                 st.divider()
@@ -340,33 +361,76 @@ elif ImageClassification_radio == "Two way":
                     st.error(f"An unexpected error occurred: {error_message}")
                 st.stop()
 
-        # Model Testing Section
+        data_eval = st.expander("Data Visulisation")
+        with data_eval:
+            if "history" in st.session_state:
+                history_data = st.session_state.history  # Lade die gespeicherten History-Daten
+                accuracy = history_data["accuracy"]
+                val_accuracy = history_data["val_accuracy"]
+                loss = history_data["loss"]
+                val_loss = history_data["val_loss"]
+                epochs_val = range(1, len(accuracy) + 1)
+
+                # DataFrame erstellen
+                data = {
+                    'epochs': epochs_val,
+                    'accuracy': accuracy, 
+                    'val_accuracy': val_accuracy,
+                    'loss': loss,
+                    'val_loss': val_loss
+                }
+
+                df = pd.DataFrame(data)
+                df = df.set_index('epochs')
+                
+                st.dataframe(df, use_container_width=True)
+                st.divider()
+
+                # Plot die Genauigkeit
+                
+                st.markdown("### Model Evaluation")
+                st.line_chart(df[["accuracy", "val_accuracy"]], 
+                            y_label=["accuracy", "val_accuracy"], 
+                            use_container_width=True)
+                
+                st.line_chart(df[["loss", "val_loss"]], 
+                            y_label=["accuracy", "val_accuracy"], 
+                            use_container_width=True)
+            
+            else:
+                st.info("Train the model first to visualize the results.")  
+
+
+
+
+
+
+
+
+
+
+
+
         if st.session_state.training_completed:
             st.divider()
             st.markdown("### Test your Model:")
-            uploaded_image = st.file_uploader("Upload an image to test your model", type=["png", "jpg", "jpeg"])
+            if "model" not in st.session_state:
+                st.error("Model not found. Please train the model first.")
+            else:
+                uploaded_image = st.file_uploader("Upload an image to test your model", type=["png", "jpg", "jpeg"])
 
-            if uploaded_image is not None:
-                try:
+                if uploaded_image is not None:
                     img = image.load_img(uploaded_image, target_size=(180, 180))
                     img_array = image.img_to_array(img)
-                    # Das Bild auf die Batch-Dimension erweitern (Modell erwartet eine Batch von Bildern)
                     img_array = np.expand_dims(img_array, axis=0)
-                    # Vorhersage auswerten
-                    prediction = model.predict(img_array)
-                    st.write(prediction)
-                    # Da es eine binäre Klassifikation (Hund vs. Katze) ist:
-                    if prediction[0] > 0.5:
-                        print(f"Das Bild zeigt einen {name_class_1}.")
+
+                    # Vorhersage des Modells
+                    model = st.session_state.model
+                    prediction_results = model.predict(img_array)
+
+                    if prediction_results[0] > 0.5:
+                        st.write(f"The image is classified as {name_class_1} with a probability of {prediction_results[0]}")
                     else:
-                        print(f"Das Bild zeigt eine {name_class_2}.")
-
-
-
-
-
-                except Exception as e:
-                    st.error(f"An error occurred while processing the image: {e}")
-            else:
-                st.info("Please upload an image to test the model.")
-
+                        st.write(f"The image is classified as {name_class_2} with a probability of {1 - prediction_results[0]}")
+                else:
+                    st.info("Please upload an image to test the model.")
