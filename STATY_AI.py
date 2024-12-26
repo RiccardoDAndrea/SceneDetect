@@ -10,12 +10,23 @@ from tensorflow.keras.preprocessing import image
 import numpy as np
 from tensorflow.keras.datasets import cifar100
 import os
-CUDA_VISIBLE_DEVICES=""
+from PIL import Image
+import shutil
+
+
+
+
 
 st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide")
 
 # Title
 st.title("STATY AI")
+
+
+if os.path.exists("UploadedFile"):
+    # Löscht den gesamten Ordner und seinen Inhalt
+    shutil.rmtree("UploadedFile")
+
 
 ImageClassification_radio = st.radio(
     "Image Classification",
@@ -108,10 +119,7 @@ elif ImageClassification_radio == "Two way":
                 image_size=(180, 180),
                 batch_size=32
             )
-            print("===================================")
-            print(validation_dataset)
-            print("===================================")
-    
+
     else:
         st.stop()
 
@@ -227,7 +235,7 @@ elif ImageClassification_radio == "Two way":
                 ]
         )
         x = data_augmentation(inputs)  # Start with augmented input
-        #x = layers.Rescaling(1./255)(x)
+        x = layers.Rescaling(1./255)(x)
         # Build layers dynamically
         for i in range(number_layers):
             layer_type = layer_types[i]
@@ -340,31 +348,22 @@ elif ImageClassification_radio == "Two way":
 
             if uploaded_image is not None:
                 try:
-                    # Load and preprocess the uploaded image
-                    from PIL import Image
-                    img = Image.open(uploaded_image).convert("RGB")
-                    img_resized = img.resize((180, 180))
-                    st.image(img, caption="Uploaded Image", use_column_width=True)
-
-                    # Convert image to array
-                    img_array = np.array(img_resized) / 255.0  # Normalize pixel values
+                    img = image.load_img(uploaded_image, target_size=(180, 180))
+                    img_array = image.img_to_array(img)
+                    # Das Bild auf die Batch-Dimension erweitern (Modell erwartet eine Batch von Bildern)
                     img_array = np.expand_dims(img_array, axis=0)
-
-                    # Make a prediction
+                    # Vorhersage auswerten
                     prediction = model.predict(img_array)
-
-                    # Interpret the prediction
-                    class_1_prob = prediction[0][0]
-                    class_2_prob = 1 - class_1_prob
-
-                    if class_1_prob > 0.5:
-                        st.write(f"The image depicts a **{name_class_1}**.")
+                    st.write(prediction)
+                    # Da es eine binäre Klassifikation (Hund vs. Katze) ist:
+                    if prediction[0] > 0.5:
+                        print(f"Das Bild zeigt einen {name_class_1}.")
                     else:
-                        st.write(f"The image depicts a **{name_class_2}**.")
+                        print(f"Das Bild zeigt eine {name_class_2}.")
 
-                    # Display prediction probabilities
-                    st.write(f"Prediction probability for {name_class_1}: {class_1_prob:.2f}")
-                    st.write(f"Prediction probability for {name_class_2}: {class_2_prob:.2f}")
+
+
+
 
                 except Exception as e:
                     st.error(f"An error occurred while processing the image: {e}")
