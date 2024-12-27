@@ -1,21 +1,19 @@
+import os
+import shutil
+import numpy as np
+import pandas as pd
+from PIL import Image
 import streamlit as st
 import imageio.v2 as imageio 
+import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-import tensorflow as tf
-import pandas as pd
-from tensorflow.keras.utils import image_dataset_from_directory
-import os
 from tensorflow.keras.preprocessing import image
-import numpy as np
+from tensorflow.keras.utils import image_dataset_from_directory
 from tensorflow.keras.datasets import cifar100
-import os
-from PIL import Image
-import shutil
 
 st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide")
 
-# Title
 st.title("STATY AI")
 
 # If user load webpage new, deleting the old dir
@@ -46,7 +44,6 @@ if ImageClassification_radio == "One Way":
 ###########################
 elif ImageClassification_radio == "Two way":
     
-     
     name_class1_col, name_class2_col = st.columns(2)
     with name_class1_col:
         # User Input names get used later for the Prediciton
