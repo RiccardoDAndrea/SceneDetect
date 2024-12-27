@@ -18,7 +18,7 @@ st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide")
 # Title
 st.title("STATY AI")
 
-
+# If user load webpage new, deleting the old dir
 if os.path.exists("UploadedFile"):
     # Löscht den gesamten Ordner und seinen Inhalt
     shutil.rmtree("UploadedFile")
@@ -29,30 +29,46 @@ ImageClassification_radio = st.radio(
     ["One Way", "Two way"],
     captions=[
         "Ein Bild erkennen.",
-        "Zwei unterscheiden können.",
-    ],
-    horizontal=True
-)
+        "Zwei unterscheiden können.",],
+    horizontal=True)
 
+
+###########################
+##### O N E _ W A Y #######
+###########################
 if ImageClassification_radio == "One Way":
     st.write("You selected comedy.")
 
-elif ImageClassification_radio == "Two way":
 
+
+###########################
+##### T W O _ W A Y #######
+###########################
+elif ImageClassification_radio == "Two way":
+    
+     
     name_class1_col, name_class2_col = st.columns(2)
     with name_class1_col:
+        # User Input names get used later for the Prediciton
         name_class_1 = st.text_input("Name Class 1", key="Name Class 1")
 
     with name_class2_col:
+        # User Input names get used later for the Prediciton
         name_class_2 = st.text_input("Name Class 2", key="Name Class 2")   
+    
     # Define directories for uploaded images
-    if name_class_1 and name_class_2:
-        
+    if name_class_1 and name_class_2:   
+        # The directory structure is crucial for image classification, 
+        # as the 'image_dataset_from_directory' function requires the following hierarchy:
+        # Root Directory
+        #  └── Train
+        #      └── Prediction Classes <- all images for the classification
+
         train_dir = "UploadedFile/Train"
         train_dir_class_1 = f"UploadedFile/Train/{name_class_1}"
         train_dir_class_2 = f"UploadedFile/Train/{name_class_2}"
 
-
+        
         os.makedirs(train_dir, exist_ok=True)
         if not os.path.exists(train_dir_class_1):
             os.makedirs(train_dir_class_1, exist_ok=True)
