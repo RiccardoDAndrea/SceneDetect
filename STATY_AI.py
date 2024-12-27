@@ -60,6 +60,7 @@ elif ImageClassification_radio == "Two way":
     if name_class_1 and name_class_2:   
         # The directory structure is crucial for image classification, 
         # as the 'image_dataset_from_directory' function requires the following hierarchy:
+        #---------------------------------------------------------------------------------
         # Root Directory
         #  └── Train
         #      └── Prediction Classes <- all images for the classification
@@ -158,10 +159,6 @@ elif ImageClassification_radio == "Two way":
         st.stop()
 
         
-
-
-    #####################################################################
-
     # Model selection
     options = st.selectbox(
         "Which Models to test",
@@ -344,9 +341,10 @@ elif ImageClassification_radio == "Two way":
         if "training_completed" not in st.session_state:
             st.session_state.training_completed = False
 
-        # Compile and train model
+        # COMPILE AND TRAIN MODEL
         # Reset training flag if user wants to train again
         if st.button("Reset Training Status"):
+            # Reset the variable training_completed so user can train a new CNN-Model
             st.session_state.training_completed = False
             st.info("Training status has been reset. You can train the model again.")
 
@@ -366,6 +364,7 @@ elif ImageClassification_radio == "Two way":
                 )
 
                 # Update session state
+                # SAVE all the variables for CNN Models to run and predict
                 st.session_state.model = model
                 st.session_state.history = history.history 
                 st.session_state.training_completed = True
@@ -373,6 +372,8 @@ elif ImageClassification_radio == "Two way":
                 st.divider()
 
             except ValueError as e:
+                # User get a error message because to create a CNN Infrastruce is crucial
+                # and a lot can go wrong so the user get a example Infrastrucer.
                 error_message = str(e)
                 if "Arguments `target` and `output` must have the same rank (ndim)" in error_message:
                     st.error(
@@ -398,24 +399,28 @@ elif ImageClassification_radio == "Two way":
                     st.error(f"An unexpected error occurred: {error_message}")
                 st.stop()
 
-        data_eval = st.expander("Data Visulisation")
+        #############################################
+        #### D A T A _ V I S U A L I Z A T I O N ####
+        #############################################
+
+        data_eval = st.expander("Data Visualization")
+        # Plotting the Model evaluation in a expander
         with data_eval:
             if "history" in st.session_state:
-                history_data = st.session_state.history  # Lade die gespeicherten History-Daten
-                accuracy = history_data["accuracy"]
+                history_data = st.session_state.history  # getting the model histort of the session_state
+                accuracy = history_data["accuracy"]     
                 val_accuracy = history_data["val_accuracy"]
                 loss = history_data["loss"]
                 val_loss = history_data["val_loss"]
                 epochs_val = range(1, len(accuracy) + 1)
 
-                # DataFrame erstellen
+                # Create a Dataframe to Visualization for a line plot
                 data = {
                     'epochs': epochs_val,
                     'accuracy': accuracy, 
                     'val_accuracy': val_accuracy,
                     'loss': loss,
-                    'val_loss': val_loss
-                }
+                    'val_loss': val_loss}
 
                 df = pd.DataFrame(data)
                 df = df.set_index('epochs')
@@ -423,38 +428,29 @@ elif ImageClassification_radio == "Two way":
                 st.dataframe(df, use_container_width=True)
                 st.divider()
 
-                # Plot die Genauigkeit
-                
                 st.markdown("### Model Evaluation")
                 st.line_chart(df[["accuracy", "val_accuracy"]], 
-                            y_label=["accuracy", "val_accuracy"], 
-                            use_container_width=True)
+                                y_label=["accuracy", "val_accuracy"], 
+                                    use_container_width=True)
                 
                 st.line_chart(df[["loss", "val_loss"]], 
-                            y_label=["accuracy", "val_accuracy"], 
-                            use_container_width=True)
+                                y_label=["accuracy", "val_accuracy"], 
+                                    use_container_width=True)
             
             else:
                 st.info("Train the model first to visualize the results.")  
 
 
-
-
-
-
-
-
-
-
-
-
         if st.session_state.training_completed:
             st.divider()
             st.markdown("### Test your Model:")
+
             if "model" not in st.session_state:
                 st.error("Model not found. Please train the model first.")
+            
             else:
-                uploaded_image = st.file_uploader("Upload an image to test your model", type=["png", "jpg", "jpeg"])
+                uploaded_image = st.file_uploader("Upload an image to test your model", 
+                                                    type=["png", "jpg", "jpeg"])
 
                 if uploaded_image is not None:
                     img = image.load_img(uploaded_image, target_size=(180, 180))
