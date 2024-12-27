@@ -68,7 +68,7 @@ elif ImageClassification_radio == "Two way":
         train_dir_class_1 = f"UploadedFile/Train/{name_class_1}"
         train_dir_class_2 = f"UploadedFile/Train/{name_class_2}"
 
-        
+
         os.makedirs(train_dir, exist_ok=True)
         if not os.path.exists(train_dir_class_1):
             os.makedirs(train_dir_class_1, exist_ok=True)
@@ -90,11 +90,13 @@ elif ImageClassification_radio == "Two way":
                     try:
                         # Open and process image using Pillow
                         img = Image.open(image_file)
+                        # checke if mode ist RGB otherwise create a error message
                         if img.mode == "RGBA":
                             img = img.convert("RGB")
                         
                         # Define unique save path
-                        save_path = os.path.join(train_dir_class_1, f"{idx}_{image_file.name}")
+                        save_path = os.path.join(train_dir_class_1, 
+                                                f"{idx}_{image_file.name}")
                         img.save(save_path, format="PNG")
                     
                     except Exception as e:
@@ -115,14 +117,18 @@ elif ImageClassification_radio == "Two way":
 
             if image_files_2:
                 for idx, image_file in enumerate(image_files_2):
+                    
                     try:
                         # Open and process image using Pillow
                         img = Image.open(image_file)
+                        # checke if mode ist RGB otherwise create a error message
                         if img.mode == "RGBA":
                             img = img.convert("RGB")
                         
                         # Define unique save path
-                        save_path = os.path.join(train_dir_class_2, f"{idx}_{image_file.name}")
+                        save_path = os.path.join(train_dir_class_2, 
+                                                f"{idx}_{image_file.name}")
+                        
                         img.save(save_path, format="PNG")
 
                     except Exception as e:
@@ -134,13 +140,13 @@ elif ImageClassification_radio == "Two way":
                 st.stop()
 
 
-
+            # as mentioed before the dir strucutre is curcial for CNN in Tensorflow.Keras
+            # image_size and batch_size ist changeble
             train_dataset = image_dataset_from_directory(
                 train_dir,
                 image_size=(180, 180),
                 batch_size=32
             )
-            print(train_dataset)
             
             validation_dataset = image_dataset_from_directory(
                 "Validation",
@@ -160,13 +166,18 @@ elif ImageClassification_radio == "Two way":
     options = st.selectbox(
         "Which Models to test",
         ["Own Model","MobileNetV2", 
-            "SENET", "ViT"],
-    )
+            "SENET", "ViT"],)
+
     st.divider()
+
     if "Own Model" in options:
+    ##########################################
+    ###### O W N _ I N F R A C T U R E #######
+    ##########################################
         st.markdown("#### Create your infracture")
         
         # User input for the number of layers
+        # max_value is sett to 20 but its possible to increase the number input
         number_layers = st.number_input("Number of Layers", min_value=1, max_value=20, step=1)
 
         # Initialize storage lists
@@ -179,41 +190,42 @@ elif ImageClassification_radio == "Two way":
 
         # Loop through each layer
         for i in range(number_layers):
+
             st.divider()
+            ## Creating the User Interface
+            
             # Select the layer type
             layer_type = st.selectbox(
                 f'Layer {i+1} Type', 
-                ['Dense', 'Conv2D', 'MaxPooling2D', 'Flatten'], 
-                key=f'layer_type_{i}'
-            )
-
+                    ['Dense', 'Conv2D', 'MaxPooling2D', 'Flatten'], 
+                        key=f'layer_type_{i}')
             layer_types.append(layer_type)
 
+            # Create input columns for Conv2D layer
             if layer_type == "Conv2D":
-                # Create input columns for Conv2D layer
                 filter_col, kernel_size_col, activation_col = st.columns(3)
+
                 with filter_col:
                     filter = st.number_input(
                         f'Filters (Layer {i+1})', 
-                        min_value=1, max_value=1000, 
-                        value=32, step=1, key=f'filter_{i}'
-                    )
+                            min_value=1, max_value=1000, 
+                                value=32, step=1, key=f'filter_{i}')
+
                     filters.append(filter)
 
                 with kernel_size_col:
                     kernel_size = st.number_input(
                         f'Kernel Size (Layer {i+1})', 
-                        min_value=1, max_value=10, 
-                        value=3, step=1, key=f'kernel_size_{i}'
-                    )
+                            min_value=1, max_value=10, 
+                                value=3, step=1, key=f'kernel_size_{i}')
                     kernels.append(kernel_size)
 
                 with activation_col:
                     activation = st.selectbox(
                         f'Activation (Layer {i+1})', 
-                        ['relu', 'sigmoid', 'tanh'], 
-                        key=f'activation_{i}'
-                    )
+                            ['relu', 'sigmoid', 'tanh'], 
+                                key=f'activation_{i}')
+
                     activations.append(activation)
 
             elif layer_type == "Dense":
@@ -222,17 +234,17 @@ elif ImageClassification_radio == "Two way":
                 with units_col:
                     unit = st.number_input(
                         f'Units (Layer {i+1})', 
-                        min_value=1, max_value=512, 
-                        value=128, step=1, key=f'units_{i}'
-                    )
+                            min_value=1, max_value=512, 
+                                value=128, step=1, key=f'units_{i}')
+
                     units.append(unit)
 
                 with activation_col:
                     activation = st.selectbox(
                         f'Activation (Layer {i+1})', 
-                        ['relu', 'sigmoid', 'tanh'], 
-                        key=f'activation_dense_{i}'
-                    )
+                            ['relu', 'sigmoid', 'tanh'], 
+                            key=f'activation_dense_{i}')
+
                     activations.append(activation)
 
             elif layer_type == "MaxPooling2D":
@@ -241,30 +253,29 @@ elif ImageClassification_radio == "Two way":
                 with pool_size_col:
                     pool_size = st.number_input(
                         f'Pool Size (Layer {i+1})', 
-                        min_value=1, max_value=5, 
-                        value=2, step=1, key=f'pool_size_{i}'
-                    )
+                            min_value=1, max_value=5, 
+                            value=2, step=1, key=f'pool_size_{i}')
+
                     pool_sizes.append(pool_size)
 
             elif layer_type == "Flatten":
                 st.write("No additional parameters needed for Flatten layer.")
-
-        
-
-        # Input layer
+      
+        # First Layer: Input layer
         inputs = keras.Input(shape=(180, 180, 3))
         
 
-        # Data Augmentation layer
+        # Data Augmentation layer for a more robust model for prediciton
         data_augmentation = keras.Sequential(
             [
                 layers.RandomFlip("horizontal"),
                 layers.RandomRotation(0.1),
                 layers.RandomZoom(0.2),
-                ]
-        )
+            ])
+
         x = data_augmentation(inputs)  # Start with augmented input
-        #x = layers.Rescaling(1./255)(x)
+        # x = layers.Rescaling(1./255)(x)   
+
         # Build layers dynamically
         for i in range(number_layers):
             layer_type = layer_types[i]
@@ -291,35 +302,45 @@ elif ImageClassification_radio == "Two way":
                 x = layers.Flatten()(x)
 
         # Final output layer
+        # TODO: Create dropout layer
+
         x = layers.Dropout(0.5)(x)
         outputs = layers.Dense(unit, activation=activation)(x)  # Example output layer
 
         # Create the model
         model = keras.Model(inputs=inputs, outputs=outputs)
+
         st.divider()
-        st.markdown("#### Compile Model")
-        ###### User Interface for Compile Model
+        st.markdown("#### Compile Model")\
         
+        #################################
+        ### C O M P I L E _ M O D E L ###
+        #################################
         loss_col, optimizer_col, epochs_col = st.columns(3)
 
         with loss_col:
             loss = st.selectbox(
                 "Loss Function",
-                ["binary_crossentropy", "categorical_crossentropy", "mean_squared_error"],
-                key="loss"
-            )
+                    ["binary_crossentropy", "categorical_crossentropy", "mean_squared_error"],
+                        key="loss")
         
         with optimizer_col:
             optimizer = st.selectbox(
                 "Optimizer",
-                ["Adam", "rmsprop", "SGD"],
-                key="optimizer"
-            )
+                    ["Adam", "rmsprop", "SGD"],
+                        key="optimizer")
 
         with epochs_col:
-            epochs_user = st.number_input("Epochs", min_value=1, max_value=100, step=1, key="epochs")
+            epochs_user = st.number_input("Epochs", min_value=1, 
+                                        max_value=100, step=1, 
+                                        key="epochs")
         
-        # Initialize session state for training status
+        # Initialize session state for training status and model storage
+        # st.session_state is used to persist the model and training status across user interactions.
+        # This ensures that the model remains available for predictions even after the page reloads,
+        # for example, when a picture is uploaded for testing. Without this, the model would not be found,
+        # as Streamlit re-runs the script on every interaction.
+
         if "training_completed" not in st.session_state:
             st.session_state.training_completed = False
 
