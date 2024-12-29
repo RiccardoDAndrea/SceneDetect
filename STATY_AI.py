@@ -165,8 +165,8 @@ if ImageClassification_radio == "One Way":
         # Select the layer type
         layer_type = st.selectbox(
             f'Layer {i+1} Type',
-            ['Dense', 'Conv2D', 'MaxPooling2D', 'Flatten', 'Dropout', 
-             'BatchNormalization', 'AveragePooling2D'],
+            ['Conv2D', 'MaxPooling2D', 'Flatten', 
+             'BatchNormalization', 'AveragePooling2D','Dropout','SpatialDropout2D','Dense'],
             key=f'layer_type_{i}')
         layer_types.append(layer_type)
 
@@ -198,6 +198,7 @@ if ImageClassification_radio == "One Way":
             units.append(None)
             MAXpool_sizes.append(None)
             AVGpool_sizes.append(None)
+            Spatialdropout_rates.append(None)
             dropout_rates.append(None)   
 
         elif layer_type == "Dense":
@@ -219,6 +220,7 @@ if ImageClassification_radio == "One Way":
                 # Append placeholders for other lists
                 filters.append(None)
                 kernels.append(None)
+                Spatialdropout_rates.append(None)
                 MAXpool_sizes.append(None)
                 AVGpool_sizes.append(None)
                 dropout_rates.append(None)
@@ -233,6 +235,7 @@ if ImageClassification_radio == "One Way":
             filters.append(None)
             kernels.append(None)
             units.append(None)
+            Spatialdropout_rates.append(None)
             activations.append(None)
             dropout_rates.append(None)
         
@@ -246,6 +249,7 @@ if ImageClassification_radio == "One Way":
             filters.append(None)
             kernels.append(None)
             units.append(None)
+            Spatialdropout_rates.append(None)
             MAXpool_sizes.append(None)
             activations.append(None)
             dropout_rates.append(None)
@@ -255,6 +259,7 @@ if ImageClassification_radio == "One Way":
             kernels.append(None)
             units.append(None)
             activations.append(None)
+            Spatialdropout_rates.append(None)
             AVGpool_sizes.append(None)
             MAXpool_sizes.append(None)
             dropout_rates.append(None)
@@ -263,6 +268,20 @@ if ImageClassification_radio == "One Way":
         elif layer_type == "Dropout":
             dropout_rates.append(st.number_input(
                 f'Dropout Rate (Layer {i+1})',
+                min_value=0.0, max_value=0.5, step=0.1, key=f'dropout_{i}'))
+
+            # Append placeholders for other lists
+            filters.append(None)
+            kernels.append(None)
+            units.append(None)
+            Spatialdropout_rates.append(None)
+            activations.append(None)
+            MAXpool_sizes.append(None)
+            AVGpool_sizes.append(None)
+        
+        elif layer_type == "SpatialDropout2D":
+            Spatialdropout_rates.append(st.number_input(
+                f'SpatialDropout2D Rate (Layer {i+1})',
                 min_value=0.0, max_value=0.5, step=0.1, key=f'dropout_{i}'))
 
             # Append placeholders for other lists
@@ -278,6 +297,7 @@ if ImageClassification_radio == "One Way":
             filters.append(None)
             kernels.append(None)
             units.append(None)
+            Spatialdropout_rates.append(None)
             activations.append(None)
             AVGpool_sizes.append(None)
             MAXpool_sizes.append(None)
@@ -352,7 +372,6 @@ if ImageClassification_radio == "One Way":
     # Modell erstellen
     model = keras.Model(inputs=inputs, outputs=outputs)
     # Create the model
-    model = keras.Model(inputs=inputs, outputs=outputs)
     print("==========================================")
     print(model.summary())
     print("==========================================")
@@ -393,61 +412,63 @@ if ImageClassification_radio == "One Way":
 
     # COMPILE AND TRAIN MODEL
     # Reset training flag if user wants to train again
-    if st.button("Reset Training Status"):
-        # Reset the variable training_completed so user can train a new CNN-Model
-        st.session_state.training_completed = False
-        st.info("Training status has been reset. You can train the model again.")
-
+    ResetTraining_col,CompileTrain_col = st.columns(2)
+    with ResetTraining_col:
+        if st.button("Reset Training Status"):
+            # Reset the variable training_completed so user can train a new CNN-Model
+            st.session_state.training_completed = False
+            st.info("Training status has been reset. You can train the model again.")
+    with  CompileTrain_col:
     # Button to compile and train the model
-    if st.button("Compile and Train Model") and not st.session_state.training_completed:
-        try:
-            # Compile the model
-            model.compile(loss=loss, optimizer=optimizer, 
-                            metrics=["accuracy"])
-            st.info("Model compilation successful.")
-            
-            # Train the model
-            history = model.fit(
-                train_dataset,
-                epochs=epochs_user,
-                validation_data=validation_dataset
-            )
-
-            # Update session state
-            # SAVE all the variables for CNN Models to run and predict
-            st.session_state.model = model
-            st.session_state.history = history.history 
-            st.session_state.training_completed = True
-            st.success("Model training completed successfully.")
-            st.divider()
-
-        except ValueError as e:
-            # User get a error message because to create a CNN Infrastruce is crucial
-            # and a lot can go wrong so the user get a example Infrastrucer.
-            error_message = str(e)
-            if "Arguments `target` and `output` must have the same rank (ndim)" in error_message:
-                st.error(
-                    "Shape mismatch detected: The output shape of the model does not match the target labels. "
-                    "Ensure the output layer configuration matches the dataset labels. "
-                    "For binary classification, use `Dense(1, activation='sigmoid')`."
+        if st.button("Compile and Train Model") and not st.session_state.training_completed:
+            try:
+                # Compile the model
+                model.compile(loss=loss, optimizer=optimizer, 
+                                metrics=["accuracy"])
+                st.info("Model compilation successful.")
+                
+                # Train the model
+                history = model.fit(
+                    train_dataset,
+                    epochs=epochs_user,
+                    validation_data=validation_dataset
                 )
-                st.info(
-                    """
-                    Your model should have the following configuration for binary classification:
 
-                        - Input layer: `Input(shape=(180, 180, 3))`
-                        - Conv2D with filters (32), kernel size (3), and activation (`relu`)
-                        - MaxPooling2D with pool size (2)
-                        - Conv2D with filters (64), kernel size (3), and activation (`relu`)
-                        - MaxPooling2D with pool size (2)
-                        - Conv2D with filters (128), kernel size (3), and activation (`relu`)
-                        - Flatten layer
-                        - Output layer: `Dense(1, activation='sigmoid')
-                    """
-                )
-            else:
-                st.error(f"An unexpected error occurred: {error_message}")
-            st.stop()
+                # Update session state
+                # SAVE all the variables for CNN Models to run and predict
+                st.session_state.model = model
+                st.session_state.history = history.history 
+                st.session_state.training_completed = True
+                st.success("Model training completed successfully.")
+                
+
+            except ValueError as e:
+                # User get a error message because to create a CNN Infrastruce is crucial
+                # and a lot can go wrong so the user get a example Infrastrucer.
+                error_message = str(e)
+                if "Arguments `target` and `output` must have the same rank (ndim)" in error_message:
+                    st.error(
+                        "Shape mismatch detected: The output shape of the model does not match the target labels. "
+                        "Ensure the output layer configuration matches the dataset labels. "
+                        "For binary classification, use `Dense(1, activation='sigmoid')`."
+                    )
+                    st.info(
+                        """
+                        Your model should have the following configuration for binary classification:
+
+                            - Input layer: `Input(shape=(180, 180, 3))`
+                            - Conv2D with filters (32), kernel size (3), and activation (`relu`)
+                            - MaxPooling2D with pool size (2)
+                            - Conv2D with filters (64), kernel size (3), and activation (`relu`)
+                            - MaxPooling2D with pool size (2)
+                            - Conv2D with filters (128), kernel size (3), and activation (`relu`)
+                            - Flatten layer
+                            - Output layer: `Dense(1, activation='sigmoid')
+                        """
+                    )
+                else:
+                    st.error(f"An unexpected error occurred: {error_message}")
+                st.stop()
 
     #############################################
     #### D A T A _ V I S U A L I Z A T I O N ####
