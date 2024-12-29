@@ -762,6 +762,7 @@ elif ImageClassification_radio == "Two way":
             units.append(None)
             Spatialdropout_rates.append(None)
             activations.append(None)
+            AVGpool_sizes.append(None)
             dropout_rates.append(None)
         
         elif layer_type == "AveragePooling2D":
@@ -912,8 +913,8 @@ elif ImageClassification_radio == "Two way":
     with loss_col:
         loss = st.selectbox(
             "Loss Function",
-                ["binary_crossentropy", "categorical_crossentropy", "mean_squared_error"],
-                    key="loss")
+            ["binary_crossentropy", "categorical_crossentropy", "mean_squared_error"],
+            key="loss")
     
     with optimizer_col:
         optimizer = st.selectbox(
@@ -938,6 +939,7 @@ elif ImageClassification_radio == "Two way":
     # COMPILE AND TRAIN MODEL
     # Reset training flag if user wants to train again
     ResetTraining_col,CompileTrain_col = st.columns(2)
+
     with ResetTraining_col:
         if st.button("Reset Training Status"):
             # Reset the variable training_completed so user can train a new CNN-Model
