@@ -16,8 +16,7 @@ st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide")
 
 st.title("STATY AI")
 
-import os
-import shutil
+
 
 base_dir = "UploadedFile/Train"
 exclude_dir = os.path.join(base_dir, "randomImages")
@@ -25,14 +24,17 @@ exclude_dir = os.path.join(base_dir, "randomImages")
 if os.path.exists(base_dir):
     for item in os.listdir(base_dir):
         item_path = os.path.join(base_dir, item)
-        # Überspringe das Verzeichnis "nothing"
+        # Skip the "random Images" directory
+        # “Random Images” is the directory of random images 
+        # used to train a class model to tell if train_dir_class1 
+        # is what the user enters on the image.
         if item_path == exclude_dir:
             continue
-        # Lösche Dateien oder Verzeichnisse
+        # Delete files or directories
         if os.path.isfile(item_path) or os.path.islink(item_path):
-            os.unlink(item_path)  # Löscht Dateien oder symbolische Links
+            os.unlink(item_path)  
         elif os.path.isdir(item_path):
-            shutil.rmtree(item_path)  # Löscht ganze Verzeichnisse
+            shutil.rmtree(item_path)  
 
 
 
@@ -40,8 +42,8 @@ ImageClassification_radio = st.radio(
     "Image Classification",
     ["One Way", "Two way"],
     captions=[
-        "Ein Bild erkennen.",
-        "Zwei unterscheiden können.",],
+        "Recognize a picture.",
+        "Distinguish between two.",],
     horizontal=True)
 
 
@@ -52,7 +54,7 @@ if ImageClassification_radio == "One Way":
     
     
     
-        # User Input names get used later for the Prediciton
+    # User Input names get used later for the Prediciton
     name_class_1 = st.text_input("Name Class 1", key="Name Class 1")
 
     
@@ -65,17 +67,19 @@ if ImageClassification_radio == "One Way":
         # Root Directory
         #  └── Train
         #      └── Prediction Classes <- all images for the classification
+        # Both Pytorch and Tensorflow/Keras need an order structure for the ImageClassification to recognize which images (classes) are there.
+        # If the folder is named Cat, all images in this folder are used to train the CNN model on the Cat.
+        # Exactly the same if the other folder is called Dog     
 
         train_dir = "UploadedFile/Train"
         train_dir_class_1 = f"UploadedFile/Train/{name_class_1}"
-
+        
+        # Creates a directory based on the user input on which the classes are trained.
         os.makedirs(train_dir, exist_ok=True)
+        
         if not os.path.exists(train_dir_class_1):
             os.makedirs(train_dir_class_1, exist_ok=True)
-            
-        
-        # File upload columns
-         # Train Dataset Upload
+
         
         image_files_1 = st.file_uploader(
             "Upload the first Class Images", 
@@ -84,11 +88,13 @@ if ImageClassification_radio == "One Way":
             key="file_uploader_1")
 
         if image_files_1:
+            # looping over the pictures to rename them in numbers (0,1,2).jepg
             for idx, image_file in enumerate(image_files_1):
                 try:
                     # Open and process image using Pillow
                     img = Image.open(image_file)
                     # checke if mode ist RGB otherwise create a error message
+                    # Keras function image_dataset_from_directory need RGB otherwise error message
                     if img.mode == "RGBA":
                         img = img.convert("RGB")
                     
@@ -108,7 +114,7 @@ if ImageClassification_radio == "One Way":
         
         # Prüfen, ob der Ordner existiert
         if not os.path.exists(train_dir_class_1):
-            st.error(f"Das Verzeichnis '{train_dir_class_1}' existiert nicht. Bitte erstelle es und lade Bilder hoch.")
+            st.error(f"The directory '{train_dir_class_1}' does not exist. Please create it and upload images.")
             st.stop()
 
         # Prüfen, ob der Ordner leer ist
@@ -116,19 +122,20 @@ if ImageClassification_radio == "One Way":
             st.error(f"Das Verzeichnis '{train_dir_class_1}' ist leer. Bitte lade Bilder hoch.")
             st.stop()
 
-        # Dataset laden
+        # load Dataset 
         train_dataset = image_dataset_from_directory(
             train_dir,
             image_size=(180, 180),
             batch_size=32
         )
+
         validation_dataset = image_dataset_from_directory(
-            "cats_vs_dogs_small/validation",
+            "Validation",
             image_size=(180, 180),
             batch_size=32
         )
 
-        st.success("Trainingsdaten erfolgreich geladen.")
+        st.success("Successful loading of images")
 
     else:
         st.stop()
@@ -142,7 +149,7 @@ if ImageClassification_radio == "One Way":
     st.markdown("#### Create your infracture")
     
     # User input for the number of layers
-    # max_value is sett to 20 but its possible to increase the number input
+    # max_value is set to 20 but its possible to increase the number input
     number_layers = st.number_input("Number of Layers", min_value=1, max_value=20, step=1)
 
     # Initialize storage lists
@@ -155,6 +162,7 @@ if ImageClassification_radio == "One Way":
     activations = []
     dropout_rates = []
     Spatialdropout_rates = []
+    
 
     # Loop through each layer
     for i in range(number_layers):
@@ -165,8 +173,11 @@ if ImageClassification_radio == "One Way":
         # Select the layer type
         layer_type = st.selectbox(
             f'Layer {i+1} Type',
-            ['Conv2D', 'MaxPooling2D', 'Flatten', 
-             'BatchNormalization', 'AveragePooling2D','Dropout','SpatialDropout2D','Dense'],
+            [
+             'Conv2D', 'MaxPooling2D', 'Flatten', 
+             'BatchNormalization', 'AveragePooling2D','Dropout',
+             'SpatialDropout2D','Dense'
+             ],
             key=f'layer_type_{i}')
         layer_types.append(layer_type)
 
@@ -195,6 +206,8 @@ if ImageClassification_radio == "One Way":
                     key=f'activation_{i}'))
 
             # Append placeholders for other lists
+            # To aviod the error messages "list out of index" we will append None to the 
+            # untouches list to make the list the same length.
             units.append(None)
             MAXpool_sizes.append(None)
             AVGpool_sizes.append(None)
@@ -226,10 +239,12 @@ if ImageClassification_radio == "One Way":
                 dropout_rates.append(None)
 
         elif layer_type == "MaxPooling2D":
-            MAXpool_sizes.append(st.number_input(
-                f'Pool Size (Layer {i+1})',
-                min_value=1, max_value=5,
-                value=2, step=1, key=f'pool_size_{i}'))
+            MAXpool_sizes.append(
+                    st.number_input(
+                    f'Pool Size (Layer {i+1})',
+                    min_value=1, max_value=5,
+                    value=2, step=1, key=f'pool_size_{i}')
+                    )
 
             # Append placeholders for other lists
             filters.append(None)
@@ -240,10 +255,12 @@ if ImageClassification_radio == "One Way":
             dropout_rates.append(None)
         
         elif layer_type == "AveragePooling2D":
-            AVGpool_sizes.append(st.number_input(
-                f'Pool Size (Layer {i+1})',
-                min_value=1, max_value=5,
-                value=2, step=1, key=f'pool_size_{i}'))
+            AVGpool_sizes.append(
+                    st.number_input(
+                    f'Pool Size (Layer {i+1})',
+                    min_value=1, max_value=5,
+                    value=2, step=1, key=f'pool_size_{i}')
+                    )
 
             # Append placeholders for other lists
             filters.append(None)
@@ -266,9 +283,11 @@ if ImageClassification_radio == "One Way":
 
 
         elif layer_type == "Dropout":
-            dropout_rates.append(st.number_input(
-                f'Dropout Rate (Layer {i+1})',
-                min_value=0.0, max_value=0.5, step=0.1, key=f'dropout_{i}'))
+            dropout_rates.append(
+                    st.number_input(
+                    f'Dropout Rate (Layer {i+1})',
+                    min_value=0.0, max_value=0.5, step=0.1, key=f'dropout_{i}')
+                    )
 
             # Append placeholders for other lists
             filters.append(None)
@@ -280,9 +299,11 @@ if ImageClassification_radio == "One Way":
             AVGpool_sizes.append(None)
         
         elif layer_type == "SpatialDropout2D":
-            Spatialdropout_rates.append(st.number_input(
-                f'SpatialDropout2D Rate (Layer {i+1})',
-                min_value=0.0, max_value=0.5, step=0.1, key=f'dropout_{i}'))
+            Spatialdropout_rates.append(
+                    st.number_input(
+                    f'SpatialDropout2D Rate (Layer {i+1})',
+                    min_value=0.0, max_value=0.5, step=0.1, key=f'dropout_{i}')
+                )
 
             # Append placeholders for other lists
             filters.append(None)
@@ -307,6 +328,7 @@ if ImageClassification_radio == "One Way":
     inputs = keras.Input(shape=(180, 180, 3))
     
     # Data Augmentation layer for a more robust model for prediciton
+    # TODO: Adding more the increase Validaiton of the Model for better performance 
     data_augmentation = keras.Sequential(
         [
             layers.RandomFlip("horizontal"),
@@ -336,11 +358,6 @@ if ImageClassification_radio == "One Way":
             x = layers.MaxPooling2D(pool_size=MAXpool_sizes[i])(x)
         elif layer_type == "AveragePooling2D":
             x = layers.AveragePooling2D(pool_size=AVGpool_sizes[i])(x)
-        
-
-
-    # Final output layer
-    # TODO: Create dropout layer
 
     # if len(units) == 0:
     #     st.info("""
@@ -363,21 +380,23 @@ if ImageClassification_radio == "One Way":
 
     output_units = st.number_input(
         "Number of Output Units", min_value=1, value=1, step=1, key="output_units")
+    
     output_activation = st.selectbox(
         "Output Activation", ['sigmoid', 'softmax', 'linear'], key="output_activation")
 
-    # Erstelle die Ausgabe-Schicht basierend auf Benutzereingaben
+    # Create the output layer based on user input
     outputs = layers.Dense(output_units, activation=output_activation)(x)
 
-    # Modell erstellen
+    # Create Model
     model = keras.Model(inputs=inputs, outputs=outputs)
-    # Create the model
+
+    # Create the model overview for Dev if the layers get properly added
     print("==========================================")
     print(model.summary())
     print("==========================================")
 
     st.divider()
-    st.markdown("#### Compile Model")\
+    st.markdown("#### Compile Model")
     
     #################################
     ### C O M P I L E _ M O D E L ###
@@ -387,8 +406,12 @@ if ImageClassification_radio == "One Way":
     with loss_col:
         loss = st.selectbox(
             "Loss Function",
-                ["binary_crossentropy", "categorical_crossentropy", "mean_squared_error"],
-                    key="loss")
+            [
+            "binary_crossentropy", 
+            "categorical_crossentropy", 
+            "mean_squared_error"
+            ],
+            key="loss")
     
     with optimizer_col:
         optimizer = st.selectbox(
@@ -397,27 +420,31 @@ if ImageClassification_radio == "One Way":
                     key="optimizer")
 
     with epochs_col:
-        epochs_user = st.number_input("Epochs", min_value=1, 
+        epochs_user = st.number_input(
+                                    "Epochs", min_value=1, 
                                     max_value=100, step=1, 
-                                    key="epochs")
+                                    key="epochs"
+                                    )
     
     # Initialize session state for training status and model storage
     # st.session_state is used to persist the model and training status across user interactions.
     # This ensures that the model remains available for predictions even after the page reloads,
-    # for example, when a picture is uploaded for testing. Without this, the model would not be found,
-    # as Streamlit re-runs the script on every interaction.
+    # for example, when a picture is uploaded for testing. Without this, the model would 
+    # not be found, as Streamlit re-runs the script on every interaction.
 
     if "training_completed" not in st.session_state:
         st.session_state.training_completed = False
 
     # COMPILE AND TRAIN MODEL
     # Reset training flag if user wants to train again
-    ResetTraining_col,CompileTrain_col = st.columns(2)
+    ResetTraining_col, CompileTrain_col = st.columns(2)
+    
     with ResetTraining_col:
         if st.button("Reset Training Status"):
             # Reset the variable training_completed so user can train a new CNN-Model
             st.session_state.training_completed = False
             st.info("Training status has been reset. You can train the model again.")
+    
     with  CompileTrain_col:
     # Button to compile and train the model
         if st.button("Compile and Train Model") and not st.session_state.training_completed:
@@ -435,7 +462,7 @@ if ImageClassification_radio == "One Way":
                 )
 
                 # Update session state
-                # SAVE all the variables for CNN Models to run and predict
+                # SAVE all the variables for CNN Models to run the predicitons
                 st.session_state.model = model
                 st.session_state.history = history.history 
                 st.session_state.training_completed = True
@@ -501,13 +528,16 @@ if ImageClassification_radio == "One Way":
             st.divider()
 
             st.markdown("### Model Evaluation")
-            st.line_chart(df[["accuracy", "val_accuracy"]], 
-                            y_label=["accuracy", "val_accuracy"], 
-                                use_container_width=True)
+            st.line_chart(
+                        df[["accuracy", "val_accuracy"]], 
+                        y_label=["accuracy", "val_accuracy"], 
+                        use_container_width=True
+                        )
             
-            st.line_chart(df[["loss", "val_loss"]], 
-                            y_label=["accuracy", "val_accuracy"], 
-                                use_container_width=True)
+            st.line_chart(
+                        df[["loss", "val_loss"]], 
+                        y_label=["accuracy", "val_accuracy"], 
+                        use_container_width=True)
         
         else:
             st.info("Train the model first to visualize the results.")  
@@ -564,6 +594,9 @@ elif ImageClassification_radio == "Two way":
         # Root Directory
         #  └── Train
         #      └── Prediction Classes <- all images for the classification
+        # Both Pytorch and Tensorflow/Keras need an order structure for the ImageClassification to recognize which images (classes) are there.
+        # If the folder is named Cat, all images in this folder are used to train the CNN model on the Cat.
+        # Exactly the same if the other folder is called Dog 
 
         train_dir = "UploadedFile/Train"
         train_dir_class_1 = f"UploadedFile/Train/{name_class_1}"
