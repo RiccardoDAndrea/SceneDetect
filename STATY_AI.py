@@ -130,7 +130,7 @@ if ImageClassification_radio == "One Way":
         )
 
         validation_dataset = image_dataset_from_directory(
-            "Validation",
+            "cats_vs_dogs_small/validation",
             image_size=(180, 180),
             batch_size=32
         )
@@ -683,7 +683,7 @@ elif ImageClassification_radio == "Two way":
             )
             
             validation_dataset = image_dataset_from_directory(
-                "Validation",
+                "cats_vs_dogs_small/validation",
                 image_size=(180, 180),
                 batch_size=32
             )

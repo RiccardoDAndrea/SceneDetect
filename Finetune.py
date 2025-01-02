@@ -49,10 +49,6 @@ else:
         "Which Models to test",
         ["MobileNetV2", "SENET", "ViT"],
     )
-    
-
-
-    
 
     ##################################################
     ######### M O B I L E _ N E T_ V 2 ###############
