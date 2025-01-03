@@ -17,24 +17,6 @@ st.set_page_config(page_title="STATY AI", page_icon="🧊", layout="wide")
 st.title("STATY AI")
 
 base_dir = "UploadedFile/Train"
-exclude_dir = os.path.join(base_dir, "randomImages")
-
-if os.path.exists(base_dir):
-    for item in os.listdir(base_dir):
-        item_path = os.path.join(base_dir, item)
-        # Skip the "random Images" directory
-        # “Random Images” is the directory of random images 
-        # used to train a class model to tell if train_dir_class1 
-        # is what the user enters on the image.
-        if item_path == exclude_dir:
-            continue
-        # Delete files or directories
-        if os.path.isfile(item_path) or os.path.islink(item_path):
-            os.unlink(item_path)  
-        elif os.path.isdir(item_path):
-            shutil.rmtree(item_path)  
-
-
 
 ImageClassification_radio = st.radio(
     "Image Classification",
@@ -54,7 +36,6 @@ if ImageClassification_radio == "One Way":
     name_class_1 = st.text_input("Name Class 1", key="Name Class 1")
 
     
-    
     # Define directories for uploaded images
     if name_class_1:   
         # The directory structure is crucial for image classification, 
@@ -68,13 +49,22 @@ if ImageClassification_radio == "One Way":
         # Exactly the same if the other folder is called Dog     
 
         train_dir = "UploadedFile/Train"
-        train_dir_class_1 = f"UploadedFile/Train/{name_class_1}"
+        test_dir = "UploadedFile/Test"
+        validation_dir = "UploadedFile/Validation"
+
+        train_subDir_class_1 = f"UploadedFile/Train/{name_class_1}"
+        test_subDir_class_1 = f"UploadedFile/Test/{name_class_1}"
+        valid_subDir_class_1 = f"UploadedFile/Validation/{name_class_1}"
         
         # Creates a directory based on the user input on which the classes are trained.
         os.makedirs(train_dir, exist_ok=True)
+        os.makedirs(test_dir, exist_ok=True)
+        os.makedirs(validation_dir, exist_ok=True)
         
-        if not os.path.exists(train_dir_class_1):
-            os.makedirs(train_dir_class_1, exist_ok=True)
+        if not os.path.exists(train_subDir_class_1):
+            os.makedirs(train_subDir_class_1, exist_ok=True)
+            os.makedirs(test_subDir_class_1, exist_ok=True)
+            os.makedirs(valid_subDir_class_1, exist_ok=True)
 
         
         image_files_1 = st.file_uploader(
@@ -83,6 +73,11 @@ if ImageClassification_radio == "One Way":
             type=["jpg", "jpeg", "png","JPEG"], 
             key="file_uploader_1")
 
+        images = len(image_files_1)
+        st.write(int(images * .60))
+        st.write(int(images * .20))
+        st.write(int(images * .20))
+     
         if image_files_1:
             # looping over the pictures to rename them in numbers (0,1,2).jepg
             for idx, image_file in enumerate(image_files_1):
