@@ -143,8 +143,7 @@ if ImageClassification_radio == "One Way":
             batch_size=32
         )
 
-        st.success("Successful loading of images")
-
+        st.success(f"Successful loading of images {images_int}")
     else:
         st.stop()
 
@@ -798,23 +797,6 @@ elif ImageClassification_radio == "Two way":
                     except Exception as e:
                         st.error(f"Error processing {image_file.name}: {e}")
             
-            
-            # Prüfen, ob der Ordner existiert
-            directories_to_check = [
-                f"UploadedFile/Test/{name_class_1}",
-                f"UploadedFile/Train/{name_class_1}",
-                f"UploadedFile/Validation/{name_class_1}"
-            ]
-
-            # Überprüfung aller Verzeichnisse
-            for dir_path in directories_to_check:
-                if not os.path.exists(dir_path):
-                    st.error(f"The directory ‘{dir_path}’ does not exist. Please create it and upload the images.")
-                    st.stop()
-                if len(os.listdir(f"UploadedFile/Test/{name_class_1}")) == 0:
-                    st.warning("Directory is empty, pls upload Images")
-                    st.stop()
-                
 
         with file_uploader_col_2:
             image_files_2 = st.file_uploader(
@@ -850,35 +832,52 @@ elif ImageClassification_radio == "Two way":
             
             
             # Prüfen, ob der Ordner existiert
-            directories_to_check = [
-                f"UploadedFile/Test/{name_class_2}",
-                f"UploadedFile/Train/{name_class_2}",
-                f"UploadedFile/Validation/{name_class_2}"
-            ]
-
-            # Überprüfung aller Verzeichnisse
-            for dir_path in directories_to_check:
-                if not os.path.exists(dir_path):
-                    st.error(f"The directory ‘{dir_path}’ does not exist. Please create it and upload the images.")
-                    st.stop()
-                if len(os.listdir(f"UploadedFile/Test/{name_class_2}")) == 0:
-                    st.warning("Directory is empty, pls upload Images")
-                    st.stop()
-
-
-            # as mentioed before the dir strucutre is curcial for CNN in Tensorflow.Keras
-            # image_size and batch_size ist changeble
-            train_dataset = image_dataset_from_directory(
-                train_dir,
-                image_size=(180, 180),
-                batch_size=32
-            )
             
-            validation_dataset = image_dataset_from_directory(
-                "cats_vs_dogs_small/validation",
-                image_size=(180, 180),
-                batch_size=32
-            )
+
+          
+
+            # Überprüfung der Verzeichnisse
+        # Prüfen, ob das Verzeichnis existiert
+        if not os.path.exists(train_subDir_class_1):
+            st.error(f"The directory '{train_subDir_class_1}' does not exist. Please create it and upload the images.")
+            st.stop()
+
+        # Prüfen, ob das Verzeichnis leer ist
+        if len(os.listdir(train_subDir_class_1)) == 0:
+            st.warning(f"The directory '{train_subDir_class_1}' is empty. Please upload images before proceeding.")
+            st.stop()
+
+        # Prüfen, ob das Verzeichnis existiert
+        if not os.path.exists(train_subDir_class_2):
+            st.error(f"The directory '{train_subDir_class_2}' does not exist. Please create it and upload the images.")
+            st.stop()
+
+        # Prüfen, ob das Verzeichnis leer ist
+        if len(os.listdir(train_subDir_class_2)) == 0:
+            st.warning(f"The directory '{train_subDir_class_2}' is empty. Please upload images before proceeding.")
+            st.stop()
+
+        
+
+        # as mentioed before the dir strucutre is curcial for CNN in Tensorflow.Keras
+        # image_size and batch_size ist changeble
+        train_dataset = image_dataset_from_directory(
+            train_dir,
+            image_size=(180, 180),
+            batch_size=32
+        )
+        
+        validation_dataset = image_dataset_from_directory(
+            validation_dir,
+            image_size=(180, 180),
+            batch_size=32
+        )
+
+        test_dataset = image_dataset_from_directory(
+            test_dir,
+            image_size=(180, 180),
+            batch_size=32
+        )
 
     else:
         st.stop()
@@ -1010,7 +1009,7 @@ elif ImageClassification_radio == "Two way":
     else:
         st.write("Data Augmentation is disabled.")
         data_augmentation = None
-        
+
     st.markdown("#### Create your infracture")
     
     # User input for the number of layers
@@ -1213,7 +1212,6 @@ elif ImageClassification_radio == "Two way":
 
 
     # Final output layer
-    # TODO: Create dropout layer
 
     # if len(units) == 0:
     #     st.info("""
@@ -1309,7 +1307,7 @@ elif ImageClassification_radio == "Two way":
                 )
 
                 # Update session state
-                # SAVE all the variables for CNN Models to run and predict
+                # SAVE all the variables for CNN Models to run the predicitons
                 st.session_state.model = model
                 st.session_state.history = history.history 
                 st.session_state.training_completed = True
@@ -1387,29 +1385,52 @@ elif ImageClassification_radio == "Two way":
             st.info("Train the model first to visualize the results.")  
 
 
-    if st.session_state.training_completed:
+            
+    # Ensure training is completed before testing
+    if st.session_state.get('training_completed', False):
         st.divider()
         st.markdown("### Test your Model:")
-
+        
+        # Evaluate the model
+        test_loss, test_acc = st.session_state.model.evaluate(test_dataset)
+        st.session_state.test_acc = test_acc
+        st.write(f"Test Accuracy: {test_acc:.3f}")
+        
+        # Check if model exists in session state
         if "model" not in st.session_state:
             st.error("Model not found. Please train the model first.")
-        
         else:
-            uploaded_image = st.file_uploader("Upload an image to test your model", 
-                                                type=["png", "jpg", "jpeg"])
+            # File uploader for testing
+            uploaded_image = st.file_uploader(
+                "Upload an image to test your model",
+                type=["png", "jpg", "jpeg"]
+            )
 
             if uploaded_image is not None:
-                img = image.load_img(uploaded_image, target_size=(180, 180))
-                img_array = image.img_to_array(img)
-                img_array = np.expand_dims(img_array, axis=0)
+                try:
+                    # Preprocess the uploaded image
+                    img = image.load_img(uploaded_image, target_size=(180, 180))
+                    img_array = image.img_to_array(img)
+                    img_array = np.expand_dims(img_array, axis=0)
 
-                # Vorhersage des Modells
-                model = st.session_state.model
-                prediction_results = model.predict(img_array)
-                st.write(prediction_results)
-                if prediction_results > 0.5:
-                    st.markdown(f"The image is classified as {name_class_1} with a probability of {prediction_results[0]}")
-                else:
-                    st.write(f"The image is classified as {name_class_2} with a probability of {1 - prediction_results[0]}")
+                    # Make predictions
+                    model = st.session_state.model
+                    prediction_results = model.predict(img_array)
+
+                    # Interpret and display results
+                    if prediction_results[0] > 0.5:
+                        st.markdown(
+                            f"The image is classified as **{name_class_1}** "
+                            f"with a probability of {prediction_results[0][0]:.2f}."
+                        )
+                    else:
+                        st.markdown(
+                            f"The image is classified as **{name_class_2}** "
+                            f"with a probability of {1 - prediction_results[0][0]:.2f}."
+                        )
+                except Exception as e:
+                    st.error(f"An error occurred during processing: {e}")
             else:
                 st.info("Please upload an image to test the model.")
+    else:
+        st.error("Training not completed. Please train the model before testing.")
