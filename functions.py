@@ -65,7 +65,19 @@ def create_TrainDir(user_input_subDir):
     
 
 #----------------------------------------------------------------------------------------------
+def checkDir_exist(train_dir_class_1):
+    # Prüfen, ob der Ordner existiert
+        if not os.path.exists(train_dir_class_1):
+            st.error(f"The directory '{train_dir_class_1}' does not exist. Please create it and upload images.")
+            st.stop()
 
+        # Prüfen, ob der Ordner leer ist
+        if not os.listdir(train_dir_class_1):
+            st.error(f"The directory '{train_dir_class_1}' is empty. Please upload images.")
+            st.stop()
+
+
+#----------------------------------------------------------------------------------------------
 
 def renameImages(image_files_1, train_dir_class_1):
     """
@@ -97,13 +109,3 @@ def renameImages(image_files_1, train_dir_class_1):
 
     return None
 
-def checkDir_exist(train_dir_class_1):
-    # Prüfen, ob der Ordner existiert
-        if not os.path.exists(train_dir_class_1):
-            st.error(f"The directory '{train_dir_class_1}' does not exist. Please create it and upload images.")
-            st.stop()
-
-        # Prüfen, ob der Ordner leer ist
-        if not os.listdir(train_dir_class_1):
-            st.error(f"The directory '{train_dir_class_1}' is empty. Please upload images.")
-            st.stop()

@@ -37,5 +37,7 @@ def app():
                 type=["jpg", "jpeg", "png","JPEG"], 
                 key="file_uploader_1")
             
-            fc.renameImages(image_files_1, train_dir_class_1)
+            
             fc.checkDir_exist(train_dir_class_1)
+            fc.renameImages(image_files_1, train_dir_class_1)
+            
